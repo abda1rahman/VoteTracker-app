@@ -11,3 +11,5 @@ async function connect() {
     process.exit(1);
   }
 }
+
+export default connect
