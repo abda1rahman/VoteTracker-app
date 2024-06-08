@@ -1,4 +1,4 @@
-import { TypeOf, number, object, string } from "zod";
+import { TypeOf, number, object, string, z } from "zod";
 
 export const createUserSchema = object({
   body: object({
@@ -11,19 +11,41 @@ export const createUserSchema = object({
     password: string({
       required_error: "Password is required",
     }),
-    ssn: number({
+    ssn: string({
       required_error: "SSN is required",
     }),
     phone: string({
       required_error: "Phone number is required",
     }),
     city_id: number().int().min(1).max(12),
+    role: z
+      .string({
+        required_error: "The role is required 'admin' or 'employ' ",
+      })
+      .refine(
+        (value: string) =>
+          ["envoy", "candidate", "developer"].includes(value.toLowerCase()),
+        {
+          message: "Role must be either 'envoy' or 'candidate' or 'developer'",
+        }
+      ),
+  }),
+});
+
+export const createEnvoySchema = object({
+  body: createUserSchema.shape.body.extend({
+    boxId: string({
+      required_error: "boxId is required",
+    }),
+    candidateId: string({
+      required_error: "candidateId is required"
+    })
   }),
 });
 
 export const loginUserSchema = object({
   body: object({
-    ssn: number({
+    ssn: string({
       required_error: "Password is required",
     }),
     password: string({
@@ -33,4 +55,5 @@ export const loginUserSchema = object({
 });
 
 export type CreateUserInput = TypeOf<typeof createUserSchema>["body"];
+export type CreateEnvoyInput = TypeOf<typeof createEnvoySchema>["body"];
 export type loginUserSchema = TypeOf<typeof loginUserSchema>["body"];

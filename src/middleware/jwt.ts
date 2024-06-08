@@ -1,12 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import {Response } from "express";
 import jwt from "jsonwebtoken";
 import config from "config";
+import { Types } from "mongoose";
 
 
 
 export const generateToken = (
-  userId: string,
-  role: "developer" | "candidate" | "envoy",
+  userId: Types.ObjectId,
+  role: string,
   res: Response
 ): string => {
   const cookieName = role;

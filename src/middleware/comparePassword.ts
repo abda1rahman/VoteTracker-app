@@ -1,4 +1,3 @@
-import candidate from "../model/candidate.model";
 import bcrypt from "bcrypt";
 
 export const comparePassword = async (

@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import config from "config";
-import log from "../utils/logger";
 
 export const isCandidateAuth = async (
   req: Request & { user?: any },
