@@ -5,7 +5,6 @@ import {
   EnvoyModel,
 } from "../model/users.model";
 import { Response } from "express";
-import { UserModelType } from "../types/user.types";
 import { omit } from "lodash";
 
 export async function getUserByIdAndRole(

@@ -25,7 +25,7 @@ router.post(
 
 
 // Register developer
-router.post("auth/createDeveloper",
+router.post("/api/auth/developer/register",
 validateResoure(createUserSchema),
 registerDeveloperHandler
 );

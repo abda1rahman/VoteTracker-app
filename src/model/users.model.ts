@@ -1,12 +1,22 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose, {Document, Types} from "mongoose";
 import bcrypt from "bcrypt";
 
-import {
-  CandidteModelType,
-  EnvoyModelType,
-  UserModelType,
-  DeveloperModelType,
-} from "../types/user.types";
+import { CreateUserInput } from "../schema/user.schema";
+
+// All Types For Model Database
+export interface UserModelType extends CreateUserInput, Document {_id: Types.ObjectId}
+export interface CandidteModelType extends Document {
+  user_id: mongoose.Types.ObjectId;
+}
+export interface EnvoyModelType extends Document {
+  user_id: mongoose.Types.ObjectId;
+  box_id: mongoose.Types.ObjectId;
+  candidate_id: mongoose.Types.ObjectId;
+}
+export interface DeveloperModelType extends Document {
+  developer_id: mongoose.Types.ObjectId;
+}
+
 
 // Global User Schema
 const userSchema = new mongoose.Schema(
@@ -33,19 +43,19 @@ const userSchema = new mongoose.Schema(
 
 // Candidate Model
 const candidateSchema = new mongoose.Schema({
-  candidateId: { type: mongoose.Schema.ObjectId, ref: "users", required: true },
+  user_id: { type: mongoose.Schema.ObjectId, ref: "users", required: true },
 });
 
 // Envoy Model
 const envoySchema = new mongoose.Schema({
-  envoyId: { type: mongoose.Schema.ObjectId, ref: "users", required: true },
-  boxId: { type: String, required: true },
-  candidateId: {type: mongoose.Schema.ObjectId, ref: "candidates", required: true}
+  user_id: { type: mongoose.Schema.ObjectId, ref: "users", required: true },
+  box_id: { type: mongoose.Schema.ObjectId, ref: "boxes", required: true },
+  candidate_id: {type: mongoose.Schema.ObjectId, ref: "candidates", required: true}
 });
 
 // Developer Model
 const developerSchema = new mongoose.Schema({
-  developerId: {
+  developer_id: {
     type: mongoose.Schema.ObjectId,
     ref: "users",
     required: true,

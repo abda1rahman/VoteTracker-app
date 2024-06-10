@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import { TypeOf, number, object, string, z } from "zod";
 
 export const createUserSchema = object({
@@ -34,10 +35,10 @@ export const createUserSchema = object({
 
 export const createEnvoySchema = object({
   body: createUserSchema.shape.body.extend({
-    boxId: string({
-      required_error: "boxId is required",
-    }),
-    candidateId: string({
+    box_id: string({
+      required_error: "box_id is required",
+    }).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
+    candidate_id: string({
       required_error: "candidateId is required"
     })
   }),
