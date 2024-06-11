@@ -2,12 +2,14 @@ import mongoose, {Document} from "mongoose";
 import { BoxesInput, BoxDetailsInput } from "../schema/box.schema";
 
 // Type for box 
-export interface BoxesType extends BoxesInput,  Document {}
+export interface BoxesType extends BoxesInput,  Document {
+  id: mongoose.Types.ObjectId
+}
 
 export interface BoxDetailsType extends BoxDetailsInput, Document {}
 
 const BoxesSchema = new mongoose.Schema({
-  city_id:{type: Number, required: true},
+  city_id: {type: Number, required: true},
   log: {type: Number, required: true},
   lat: {type: Number, required: true},
   boxName: {type: String, required: true}
@@ -26,6 +28,14 @@ const boxDetailsSchema = new mongoose.Schema({
   boxName: {type: String, required: true},
   firstName: {type: String, default: ""},
   lastName: {type: String, default: ""}
+},{
+  toJSON: {
+    transform: function(doc, ret){
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.__v;
+    }
+  }
 })
 
 

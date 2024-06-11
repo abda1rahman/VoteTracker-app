@@ -14,7 +14,10 @@ export const createBoxesSchema = object({
 
 export const createBoxDetailsSchema = object({
   body: object({
-    box_id: string({required_error: "box_id is required"}).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
+    // box_id: string({required_error: "box_id is required"}).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
+    city_id: number({
+      required_error: "City_id required as number"
+    }).int().min(1).max(12),
     boxName: string({required_error: "boxName is required"}),
     firstName: string({required_error: "First Name is required"}),
     lastName: string({required_error: "Last Name is required"}),
