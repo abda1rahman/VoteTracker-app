@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import config from "config";
 
 export const isCandidateAuth = async (
   req: Request & { user?: any },
@@ -14,8 +13,7 @@ export const isCandidateAuth = async (
 
   try {
     const decode: any = jwt.verify(
-      token,
-      config.get<string>("ACCESS_TOKEN_SECRET")
+      token, <string>process.env.ACCESS_TOKEN_SECRET
     );
     if (decode.role !== "candidate") {
       res.status(403).json({ message: "candidate is not authenticated2" });
