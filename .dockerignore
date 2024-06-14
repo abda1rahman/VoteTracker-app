@@ -20,6 +20,8 @@ default.ts
 .vscode
 .idea
 *.swp
+.env
+
 
 # Ignore test and build directories if they are not needed in the final image
 coverage

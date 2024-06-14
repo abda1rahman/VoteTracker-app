@@ -23,6 +23,7 @@ app.use(
 app.use(cookieParaser());
 app.use(router);
 
+
 app.listen(port, () => {
   log.info(`Server is running at localhost ${port}`);
 

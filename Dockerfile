@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:slim
 
 # Install Bash
 # RUN apt-get update && apt-get install -y bash
@@ -13,5 +13,5 @@ COPY . .
 
 EXPOSE 1337
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]
 

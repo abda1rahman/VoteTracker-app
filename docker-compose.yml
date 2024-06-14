@@ -1,29 +1,15 @@
-version: '3'
+version: "3"
 services:
   vote-project:
-    image: vote-image-app
+    image: abdalrahman1/votetracker-app:1.0
     build: .
     ports:
       - "1337:1337"
     env_file:
       - .env
     volumes:
-      - ./:/app
+      - vote-app:/app
       - /app/node_modules
-    depends_on:
-      - mongo_db
-
-
-  mongo_db:
-    image: mongo
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: techengelectrical
-      MONGO_INITDB_ROOT_PASSWORD: techengelectrical1997
-    volumes:
-      - mongo-db:/data/db
 
 volumes:
-  mongo-db:
+  vote-app:
