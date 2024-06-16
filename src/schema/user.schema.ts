@@ -21,7 +21,7 @@ export const createUserSchema = object({
     city_id: number().int().min(1).max(12),
     role: z
       .string({
-        required_error: "The role is required 'admin' or 'employ' ",
+        required_error: "The role is required 'envoy' or 'candidate' ",
       })
       .refine(
         (value: string) =>

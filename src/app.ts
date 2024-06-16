@@ -23,6 +23,10 @@ app.use(
 app.use(cookieParaser());
 app.use(router);
 
+app.get("/", (req, res)=> {
+  res.send('<h1 style="text-align:center; margin-top:5%;">VoteTracker-app (Backend Node js)</h1>')
+})
+
 
 app.listen(port, () => {
   log.info(`Server is running at localhost ${port}`);

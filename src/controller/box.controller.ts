@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { BoxDetailsInput, BoxesInput } from "../schema/box.schema";
+import { BoxDetailsInput, BoxParamsInput, BoxesInput } from "../schema/box.schema";
 import { BoxesModel, BoxesType, BoxDetailsModel } from "../model/box.model";
-import { Types, isValidObjectId } from "mongoose";
 import City from "../model/city.model";
+import { errorResponse, successResponse } from "../utils/apiResponse";
+import log from "../utils/logger";
 
 export const registerBoxHandler = async (
   req: Request<{}, {}, BoxesInput>,
@@ -10,15 +11,16 @@ export const registerBoxHandler = async (
 ) => {
   const { log, lat, city_id, boxName } = req.body;
   try {
+    // Get city
+    const cityJordan = await City.findOne({city_id})
+
+    // Check box name and city_id
     const checkBoxExist = await BoxesModel.findOne({ city_id, boxName });
     if (checkBoxExist) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Box Name already exists in the same city",
-        });
+      return res.status(400).json(errorResponse(res.statusCode, `Box Name or city_id already exists in ${cityJordan!.city}`));
     }
+
+    // Create box 
     const box: BoxesType = await BoxesModel.create({
       log,
       lat,
@@ -26,17 +28,11 @@ export const registerBoxHandler = async (
       city_id,
     });
 
-    res
-      .status(201)
-      .json({ success: true, message: "Box created successfully", box });
+    res.status(201).json(successResponse(res.statusCode, "Box created successfully", {...box.toJSON(),city: cityJordan!.city} ));
+
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Something went wrong while register box",
-        error,
-      });
+    console.error(error);
+    res.status(500).json(errorResponse(res.statusCode, "Something went wrong while register box", error));
   }
 };
 
@@ -48,16 +44,13 @@ export const createBoxHandler = async (
   const { boxName, firstName, lastName, city_id } = req.body;
 
   try {
-    // check if box_id exist
+
+    // check if box_id and boxName exist in boxes
     const checkBox = await BoxesModel.findOne({ boxName, city_id });
     if (!checkBox) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Box with city_id or boxName does not exist",
-        });
+      return res.status(400).json(errorResponse(res.statusCode, "Box with city_id or boxName does not exist"));
     }
+
     // Create box details
     const boxDetails = await BoxDetailsModel.create({
       box_id: checkBox.id,
@@ -66,46 +59,74 @@ export const createBoxHandler = async (
       lastName,
     });
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        message: "Box details created successfully",
-        boxDetails,
-      });
+    res.status(201).json(successResponse(res.statusCode, "Box details created successfully", boxDetails));
+
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    log.error(error);
+    return res.status(500).json(errorResponse(res.statusCode, "Internal server error"));
   }
 };
 
 // Get all boxes 
-export const getAllBoxHandler = async (req: Request, res: Response) => {
+export const getAllBoxesInCityHandler = async (req: Request<BoxParamsInput>, res: Response) => {
   try {
+    const {city_id} = req.params;
+
+    // Get all Boxes in specific city_id 
     const allBox = await BoxesModel.aggregate([
-      { $lookup: { from: "city", localField: "city_id", foreignField: "city_id", as: "city" }},
+      {$match: {city_id: parseInt(city_id)}},
+      { $lookup: { from: "cities", localField: "city_id", foreignField: "city_id", as: "city" }},
       { $unwind: "$city" },
-      { $addFields: { id: "$_id", city: "$city.name" } },
+      { $addFields: { id: "$_id", city: "$city.city" } },
       { $project: { _id:0, __v:0} },
     ]);
-    res.status(200).json({ success: true, allBox });
+
+    // Check if no boxes were found
+    if(allBox.length === 0){
+      return res.status(404).json(errorResponse(res.statusCode, "No boxes found for this city_id"))
+    }
+
+    // Respond with the retrieved boxes
+    res.status(200).json(successResponse(res.statusCode, "All Boxes", allBox))
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    log.error(error)
+    return res.status(500).json(errorResponse(res.statusCode, "Internal server error"));
   }
 };
 
-// Get box by Id 
-export const getBoxById = async(req: Request, res: Response) => {
-  const {id} = req.params
+// Get box by boxName & city_id query
+export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
+  const {boxName, city_id} = req.query
   try {
-    if(!isValidObjectId(id)){
-      return res.status(400).json({success: false, message: "Id is not vaild"})
+    
+    // check if box_id and boxName exist in boxes
+    const checkBox = await BoxesModel.findOne({ boxName, city_id });
+    if (!checkBox) {
+      return res.status(400).json(errorResponse(res.statusCode, "Box with city_id or boxName does not exist"));
     }
-    const boxDetails = await BoxDetailsModel.find({box_id: id}).select('-_id')
-    res.status(200).json({success: true, boxDetails})
+
+    const boxDetails = await BoxDetailsModel.find({box_id: checkBox.id}).select('-id -box_id -boxName -_id')
+
+    if(!boxDetails){
+      return res.status(404).json(errorResponse(res.statusCode, `Not found any details in ${boxName}`))
+    }
+    // Format the response
+    const response = {
+      boxInfo: {
+        id: checkBox.id,
+        boxName: checkBox.boxName,
+        log: checkBox.log,
+        lat: checkBox.lat,
+        city_id: checkBox.city_id
+      },
+      boxDetails: [...boxDetails]
+    }
+
+    res.status(200).json(successResponse(res.statusCode, "Box details", response))
+
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    log.error(error);
+    return res.status(500).json(errorResponse(res.statusCode, "something went wrong"));
   }
 }
 

@@ -4,34 +4,42 @@ import {
   DeveloperModel,
   EnvoyModel,
 } from "../model/users.model";
-import { Response } from "express";
 import { omit } from "lodash";
+
 
 export async function getUserByIdAndRole(
   role: string,
   userId: Types.ObjectId,
-  res: Response
 ) {
-  let userInfo;
-  switch (role) {
-    case "envoy":
-      userInfo = await EnvoyModel.findOne({ envoyId: userId });
-      break; // Add break statements to avoid falling through to subsequent cases
-    case "candidate":
-      userInfo = await CandidateModel.findOne({ candidteId: userId });
-      break;
-    case "developer":
-      userInfo = await DeveloperModel.findOne({ developerId: userId });
-      break;
-    default:
-      return res.status(400).json({ message: "Invalid role" });
-  }
-  console.log(JSON.stringify(userInfo))
-  // Rename _id to id and omit __v
-  const userJson = {
-    id: userInfo!._id,
-    ...omit(userInfo!.toJSON(), ["_id", "__v"])
-  };
+  try {
+    let userInfo;
+    console.warn("check1", role, userId)
+    switch (role) {
+      case "envoy":
+        userInfo = await EnvoyModel.findOne({ user_id: userId });
+        break;
+      case "candidate":
+        userInfo = await CandidateModel.findOne({ user_id: userId });
+        break;
+      case "developer":
+        userInfo = await DeveloperModel.findOne({ user_id: userId });
+        break;
+      default:
+        throw new Error("Invalid role");
+    }
+    console.warn("check2", userInfo)
+    if (!userInfo) {
+      throw new Error("User not found");
+    }
 
-  return userJson;
+    // Return user information with transformed JSON
+    return {
+      id: userInfo._id,
+      ...omit(userInfo.toJSON(), ["user_id"])
+    };
+
+  } catch (error) {
+    console.error('Error retrieving user:', error);
+    throw error;
+  }
 }
