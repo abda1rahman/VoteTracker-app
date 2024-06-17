@@ -24,10 +24,10 @@ const BoxesSchema = new mongoose.Schema({
 })
 
 const boxDetailsSchema = new mongoose.Schema({
-  box_id: {type: mongoose.Schema.ObjectId, ref: "boxes", required: true},
-  boxName: {type: String, required: true},
+  box_id: {type: mongoose.Schema.ObjectId, ref: "boxes", required: true},  
   firstName: {type: String, default: ""},
-  lastName: {type: String, default: ""}
+  lastName: {type: String, default: ""},
+  ssn: {type: String, required: true},
 },{
   toJSON: {
     transform: function(doc, ret){

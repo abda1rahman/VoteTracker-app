@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { isValidObjectId } from "mongoose";
 import { CandidateModel, EnvoyModel, UsersModel } from "../model/users.model";
 import City from "../model/city.model";
-import { successResponse } from "../utils/apiResponse";
+import { errorResponse, successResponse } from "../utils/apiResponse";
+import log from "../utils/logger";
 
 export const deleteUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -53,6 +54,7 @@ export const getAllCityHandler = async(req: Request, res: Response) => {
     const allCity = await City.find();
     res.status(200).json(successResponse(res.statusCode, "All City", allCity))
   } catch (error) {
-    
+    log.info(error)
+    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"))
   }
 }

@@ -21,6 +21,7 @@ export const createBoxDetailsSchema = object({
     boxName: string({required_error: "boxName is required"}),
     firstName: string({required_error: "First Name is required"}),
     lastName: string({required_error: "Last Name is required"}),
+    ssn: string({required_error: "ssn => Social security number is required."})
   })
 })
 

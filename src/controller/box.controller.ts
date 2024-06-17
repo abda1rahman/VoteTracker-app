@@ -32,7 +32,7 @@ export const registerBoxHandler = async (
 
   } catch (error) {
     console.error(error);
-    res.status(500).json(errorResponse(res.statusCode, "Something went wrong while register box", error));
+    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong while register box", error));
   }
 };
 
@@ -41,7 +41,7 @@ export const createBoxHandler = async (
   req: Request<{}, {}, BoxDetailsInput>,
   res: Response
 ) => {
-  const { boxName, firstName, lastName, city_id } = req.body;
+  const { boxName, firstName, lastName, ssn, city_id } = req.body;
 
   try {
 
@@ -51,12 +51,19 @@ export const createBoxHandler = async (
       return res.status(400).json(errorResponse(res.statusCode, "Failed to register box details. No matching box was found with the provided boxName and city_id."));
     }
 
+    // check if social number is already exist in same box
+    const checkBoxDetails = await BoxDetailsModel.findOne({ssn})
+    if(checkBoxDetails){
+      return res.status(400).json(errorResponse(res.statusCode, "ssn => social security number already exists in the same box details."));
+    }
+
     // Create box details
     const boxDetails = await BoxDetailsModel.create({
       box_id: checkBox.id,
       boxName,
       firstName,
       lastName,
+      ssn,
     });
 
     res.status(201).json(successResponse(res.statusCode, "Box details created successfully", boxDetails));
@@ -100,7 +107,7 @@ export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
   try {
     
     // check if box_id and boxName exist in boxes
-    const checkBox = await BoxesModel.findOne({ boxName, city_id });
+    const checkBox = await BoxesModel.findOne({ boxName, city_id }).populate('city_id', 'city');
     if (!checkBox) {
       return res.status(400).json(errorResponse(res.statusCode, "Box with city_id or boxName does not exist"));
     }

@@ -9,7 +9,7 @@ export const isCandidateAuth = async (
 ) => {
   const token = req.cookies.candidate;
   if (!token) {
-    res.status(403).json(errorResponse(res.statusCode,"candidate is not authenticated"));
+    return res.status(403).json(errorResponse(res.statusCode,"candidate is not authenticated"));
   }
 
   try {
@@ -17,11 +17,11 @@ export const isCandidateAuth = async (
       token, <string>process.env.ACCESS_TOKEN_SECRET
     );
     if (decode.role !== "candidate") {
-      res.status(403).json(errorResponse(res.statusCode,"candidate is not authenticated"));
+      return res.status(403).json(errorResponse(res.statusCode,"candidate is not authenticated"));
     }
     req.user = decode;
     next();
   } catch (error) {
-    res.status(401).json(errorResponse(res.statusCode, "Authentication failed: Token is expired"));
+    return res.status(401).json(errorResponse(res.statusCode, "Authentication failed: Token is expired"));
   }
 };

@@ -57,7 +57,7 @@ export const registerCandidateHandler = async (
 
   } catch (error: any) {
     log.error(error);
-    res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));
+    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -134,7 +134,7 @@ export const registerEnvoyHandler = async (
 
   } catch (error: any) {
     log.error(error);
-    res.status(500).json(errorResponse(res.statusCode, "Something went wrong"))
+    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"))
   }
 };
 
@@ -186,7 +186,7 @@ export const loginUserHandler = async (
     }
     const match = await comparePassword(password, user?.password ?? "");
     if (!match) {
-      res.status(401).json(errorResponse(res.statusCode, "Invalid ssn or password"));
+      return res.status(401).json(errorResponse(res.statusCode, "Invalid ssn or password"));
     }
 
     const token = generateToken(user!.id, user!.role, res);
