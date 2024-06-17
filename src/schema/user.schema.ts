@@ -39,7 +39,7 @@ export const createEnvoySchema = object({
       required_error: "box_id is required",
     }).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
     candidate_id: string({
-      required_error: "candidateId is required"
+      required_error: "candidate_id is required"
     })
   }),
 });

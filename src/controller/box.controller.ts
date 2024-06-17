@@ -48,7 +48,7 @@ export const createBoxHandler = async (
     // check if box_id and boxName exist in boxes
     const checkBox = await BoxesModel.findOne({ boxName, city_id });
     if (!checkBox) {
-      return res.status(400).json(errorResponse(res.statusCode, "Box with city_id or boxName does not exist"));
+      return res.status(400).json(errorResponse(res.statusCode, "Failed to register box details. No matching box was found with the provided boxName and city_id."));
     }
 
     // Create box details

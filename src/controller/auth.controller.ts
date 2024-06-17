@@ -15,7 +15,7 @@ import {
   DeveloperModel,
   EnvoyModel,
 } from "../model/users.model";
-import { Types, ObjectId } from "mongoose";
+import { Types } from "mongoose";
 import { getUserByIdAndRole } from "../service/user.service";
 import { BoxesModel } from "../model/box.model";
 import { errorResponse, successResponse } from "../utils/apiResponse";
@@ -87,9 +87,9 @@ export const registerEnvoyHandler = async (
     }
 
     // check if candidate exist
-    const checkCandidate = await CandidateModel.findById(candidate_id);
+    const checkCandidate: any = await CandidateModel.findById(candidate_id).populate('user_id')
     if (!checkCandidate) {
-      return res.status(400).json(errorResponse(res.statusCode, "Candidate does not exist in the system"));
+      return res.status(400).json(errorResponse(res.statusCode, "candidate_id does not exist in the system"));
     }
 
     // check if box id
@@ -97,6 +97,12 @@ export const registerEnvoyHandler = async (
     if (!checkBox) {
       return res.status(400).json(errorResponse(res.statusCode, "box_id does not exist in the system"));
     }
+
+    // check if enovy and candidate and city_id in the same city
+    if(!(city_id === checkCandidate!.user_id!.city_id && city_id === checkBox.city_id)){
+      return res.status(400).json(errorResponse(res.statusCode, "The city_id of the envoy does not match the city_id of the candidate and the box."));
+    }
+
     // Create user
     const user = await UsersModel.create({
       firstName,
@@ -183,7 +189,7 @@ export const loginUserHandler = async (
       res.status(401).json(errorResponse(res.statusCode, "Invalid ssn or password"));
     }
 
-    const token = generateToken(user!._id, user!.role, res);
+    const token = generateToken(user!.id, user!.role, res);
     const getOtherUserField = await getUserByIdAndRole(user.role, user.id); 
 
     const mergedUserInfo = { ...getOtherUserField, ...omit(user.toJSON(), ["password", "id"]), token };
