@@ -10,8 +10,6 @@ import dotenv from 'dotenv';
 const app = express();
 
 dotenv.config();
-const port = process.env.port;
-
 
 app.use(express.json());
 
@@ -28,8 +26,8 @@ app.get("/", (req, res)=> {
 })
 
 
-app.listen(port, () => {
-  log.info(`Server is running at localhost ${port}`);
+app.listen(process.env.port, () => {
+  log.info(`Server is running at localhost ${process.env.port}`);
 
   connect();
 });

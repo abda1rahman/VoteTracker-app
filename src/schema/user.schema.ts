@@ -80,8 +80,17 @@ export const loginUserSchema = object({
   }),
 });
 
+// Candidate Params
+export const getCandidateParamsSchema = object({
+  params: object({
+  candidate_id: string()
+  .refine((id)=>  isValidObjectId(id), { message: "candidate_id must be valid id"})
+  })
+})
+
 export type CreateUserInput = TypeOf<typeof createUserSchema>["body"];
 export type CreateEnvoyInput = TypeOf<typeof createEnvoySchema>["body"];
 export type UpdateEnovyInput = TypeOf<typeof updateEnvoySchema>["body"]
+export type CandidateParamsInput = TypeOf<typeof getCandidateParamsSchema>['params']
 export type loginUserSchema = TypeOf<typeof loginUserSchema>["body"];
 

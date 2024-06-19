@@ -5,6 +5,9 @@ import {
   EnvoyModel,
 } from "../model/users.model";
 import { omit } from "lodash";
+import log from "../utils/logger";
+import { errorResponse } from "../utils/apiResponse";
+import City from "../model/city.model";
 
 
 export async function getUserByIdAndRole(
@@ -36,8 +39,8 @@ export async function getUserByIdAndRole(
       ...omit(userInfo.toJSON(), ["user_id"])
     };
 
-  } catch (error) {
-    console.error('Error retrieving user:', error);
-    throw error;
+  } catch (error: any) {
+    throw new Error(error)
   }
 }
+

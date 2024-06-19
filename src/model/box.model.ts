@@ -1,5 +1,6 @@
 import mongoose, {Document} from "mongoose";
 import { BoxesInput, BoxDetailsInput } from "../schema/box.schema";
+import { boolean } from "zod";
 
 // Type for box 
 export interface BoxesType extends BoxesInput, Document {
