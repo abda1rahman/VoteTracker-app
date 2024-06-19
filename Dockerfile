@@ -1,8 +1,5 @@
 FROM node:slim
 
-# Install Bash
-# RUN apt-get update && apt-get install -y bash
-
 WORKDIR /app
 
 COPY package*.json ./

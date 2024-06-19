@@ -11,7 +11,7 @@ export const createUserSchema = object({
     }),
     password: string({
       required_error: "Password is required",
-    }),
+    }).optional(),
     ssn: string({
       required_error: "SSN is required",
     }),
@@ -33,6 +33,31 @@ export const createUserSchema = object({
   }),
 });
 
+// Update envoy schema
+export const updateEnvoySchema = object({
+  body: object({
+    firstName: string({
+      required_error: "First name is required",
+    }).optional(),
+    lastName: string({
+      required_error: "Last name is required",
+    }).optional(),
+    password: string({
+      required_error: "Password is required",
+    }).optional(),
+    ssn: string({
+      required_error: "SSN is required",
+    }),
+    newSSN: string({
+      required_error: "newSSN is required",
+    }).optional(),
+    phone: string({
+      required_error: "Phone number is required",
+    }).optional(),
+
+  }).strict(),
+});
+
 export const createEnvoySchema = object({
   body: createUserSchema.shape.body.extend({
     box_id: string({
@@ -40,7 +65,7 @@ export const createEnvoySchema = object({
     }).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
     candidate_id: string({
       required_error: "candidate_id is required"
-    })
+    }).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
   }),
 });
 
@@ -57,4 +82,6 @@ export const loginUserSchema = object({
 
 export type CreateUserInput = TypeOf<typeof createUserSchema>["body"];
 export type CreateEnvoyInput = TypeOf<typeof createEnvoySchema>["body"];
+export type UpdateEnovyInput = TypeOf<typeof updateEnvoySchema>["body"]
 export type loginUserSchema = TypeOf<typeof loginUserSchema>["body"];
+

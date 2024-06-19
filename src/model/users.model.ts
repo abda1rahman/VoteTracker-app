@@ -93,8 +93,9 @@ userSchema.pre<UserModelType>("save", async function (next) {
     return next();
   }
   // Hashing user password
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+    this.password = await bcrypt.hash(<string>this.password, 10);
+    next();
+
 });
 
 const UsersModel = mongoose.model<UserModelType>("users", userSchema);

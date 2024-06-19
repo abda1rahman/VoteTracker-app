@@ -13,7 +13,6 @@ export async function getUserByIdAndRole(
 ) {
   try {
     let userInfo;
-    console.warn("check1", role, userId)
     switch (role) {
       case "envoy":
         userInfo = await EnvoyModel.findOne({ user_id: userId });
@@ -27,7 +26,6 @@ export async function getUserByIdAndRole(
       default:
         throw new Error("Invalid role");
     }
-    console.warn("check2", userInfo)
     if (!userInfo) {
       throw new Error("User not found");
     }

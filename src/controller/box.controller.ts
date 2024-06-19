@@ -107,7 +107,7 @@ export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
   try {
     
     // check if box_id and boxName exist in boxes
-    const checkBox = await BoxesModel.findOne({ boxName, city_id }).populate('city_id', 'city');
+    const checkBox = await BoxesModel.findOne({ boxName, city_id })
     if (!checkBox) {
       return res.status(400).json(errorResponse(res.statusCode, "Box with city_id or boxName does not exist"));
     }
@@ -117,6 +117,7 @@ export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
     if(!boxDetails){
       return res.status(404).json(errorResponse(res.statusCode, `Not found any details in ${boxName}`))
     }
+
     // Format the response
     const response = {
       boxInfo: {
