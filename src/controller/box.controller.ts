@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
-import { BoxDetailsInput, BoxParamsInput, BoxesInput } from "../schema/box.schema";
-import { BoxesModel, BoxesType, BoxDetailsModel } from "../model/box.model";
+import { BoxMemberInput, BoxParamsInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
+import { BoxesModel, BoxesType, BoxMemberModel, VoteRecordModel } from "../model/box.model";
 import City from "../model/city.model";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
+import { EnvoyModel, EnvoyModelType } from "../model/users.model";
+import path from "path";
 
 export const registerBoxHandler = async (
   req: Request<{}, {}, BoxesInput>,
@@ -17,7 +19,7 @@ export const registerBoxHandler = async (
     // Check box name and city_id
     const checkBoxExist = await BoxesModel.findOne({ city_id, boxName });
     if (checkBoxExist) {
-      return res.status(400).json(errorResponse(res.statusCode, `Box Name or city_id already exists in ${cityJordan!.city}`));
+      return res.status(400).json(errorResponse(400, `Box Name or city_id already exists in ${cityJordan!.city}`));
     }
 
     // Create box 
@@ -28,17 +30,17 @@ export const registerBoxHandler = async (
       city_id,
     });
 
-    res.status(201).json(successResponse(res.statusCode, "Box created successfully", {...box.toJSON(),city: cityJordan!.city} ));
+    res.status(201).json(successResponse(201, "Box created successfully", {...box.toJSON(),city: cityJordan!.city} ));
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong while register box", error));
+    return res.status(500).json(errorResponse(500, "Something went wrong while register box", error));
   }
 };
 
-// Create Box Details 
+// Create Box Member 
 export const createBoxHandler = async (
-  req: Request<{}, {}, BoxDetailsInput>,
+  req: Request<{}, {}, BoxMemberInput>,
   res: Response
 ) => {
   const { boxName, firstName, lastName, ssn, city_id } = req.body;
@@ -48,17 +50,17 @@ export const createBoxHandler = async (
     // check if box_id and boxName exist in boxes
     const checkBox = await BoxesModel.findOne({ boxName, city_id });
     if (!checkBox) {
-      return res.status(400).json(errorResponse(res.statusCode, "Failed to register box details. No matching box was found with the provided boxName and city_id."));
+      return res.status(404).json(errorResponse(400, "Failed to register box member. No matching box was found with the provided boxName and city_id."));
     }
 
     // check if social number is already exist in same box
-    const checkBoxDetails = await BoxDetailsModel.findOne({ssn})
-    if(checkBoxDetails){
-      return res.status(400).json(errorResponse(res.statusCode, "ssn => social security number already exists in the same box details."));
+    const checkBoxMember = await BoxMemberModel.findOne({ssn})
+    if(checkBoxMember){
+      return res.status(400).json(errorResponse(400, "ssn => social security number already exists in the same box member."));
     }
 
-    // Create box details
-    const boxDetails = await BoxDetailsModel.create({
+    // Create box member
+    const boxMember = await BoxMemberModel.create({
       box_id: checkBox.id,
       boxName,
       firstName,
@@ -66,11 +68,11 @@ export const createBoxHandler = async (
       ssn,
     });
 
-    res.status(201).json(successResponse(res.statusCode, "Box details created successfully", boxDetails));
+    res.status(201).json(successResponse(201, "Box member created successfully", boxMember));
 
   } catch (error) {
     log.error(error);
-    return res.status(500).json(errorResponse(res.statusCode, "Internal server error"));
+    return res.status(500).json(errorResponse(500, "Internal server error"));
   }
 };
 
@@ -90,14 +92,14 @@ export const getAllBoxesInCityHandler = async (req: Request<BoxParamsInput>, res
 
     // Check if no boxes were found
     if(allBox.length === 0){
-      return res.status(404).json(errorResponse(res.statusCode, "No boxes found for this city_id"))
+      return res.status(404).json(errorResponse(404, "No boxes found for this city_id"))
     }
 
     // Respond with the retrieved boxes
-    res.status(200).json(successResponse(res.statusCode, "All Boxes", allBox))
+    res.status(200).json(successResponse(200, "All Boxes", allBox))
   } catch (error) {
     log.error(error)
-    return res.status(500).json(errorResponse(res.statusCode, "Internal server error"));
+    return res.status(500).json(errorResponse(500, "Internal server error"));
   }
 };
 
@@ -109,13 +111,13 @@ export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
     // check if box_id and boxName exist in boxes
     const checkBox = await BoxesModel.findOne({ boxName, city_id })
     if (!checkBox) {
-      return res.status(400).json(errorResponse(res.statusCode, "Box with city_id or boxName does not exist"));
+      return res.status(404).json(errorResponse(404, "Box with city_id or boxName does not exist"));
     }
 
-    const boxDetails = await BoxDetailsModel.find({box_id: checkBox.id}).select('-id -box_id -boxName -_id')
+    const boxMember = await BoxMemberModel.find({box_id: checkBox.id}).select('-id -box_id -boxName -_id')
 
-    if(!boxDetails){
-      return res.status(404).json(errorResponse(res.statusCode, `Not found any details in ${boxName}`))
+    if(!boxMember){
+      return res.status(404).json(errorResponse(404, `Not found any member in ${boxName}`))
     }
 
     // Format the response
@@ -127,16 +129,58 @@ export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
         lat: checkBox.lat,
         city_id: checkBox.city_id
       },
-      boxDetails: [...boxDetails]
+      boxMember: [...boxMember]
     }
 
-    res.status(200).json(successResponse(res.statusCode, "Box details", response))
+    res.status(200).json(successResponse(200, "Box member", response))
 
   } catch (error) {
     log.error(error);
-    return res.status(500).json(errorResponse(res.statusCode, "something went wrong"));
+    return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }
 
-// Edit box 
+// Create Vote Record 
+export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>, res:Response) =>{
+  try {
+    const {state, envoy_id, box_member_id} = req.body
+    
+    // Check if envoy exists
+    const envoy = await EnvoyModel.findById(envoy_id)
+    if(!envoy){
+      return res.status(404).json(errorResponse(404, "enovy not found"))
+    }
+
+    // Check if vote record already exists, update if found
+    const voteRecord = await VoteRecordModel.findOneAndUpdate(
+      { candidate: envoy.candidate_id, boxMember: box_member_id },
+      { state },
+      { new: true, upsert: true }
+    );
+
+    // Check if voteRecord was found and updated
+  if (voteRecord) {
+    return res.status(200).json(successResponse(200, "Vote updated successfully", voteRecord));
+  }
+
+    // Check if id member exists
+    const boxMember = await BoxMemberModel.findById(box_member_id);
+    if(!boxMember){
+      return res.status(404).json(errorResponse(404, "box_member_id does not found"))
+    }
+
+    // Create new vote record if not found
+    const newVoteRecord  = await VoteRecordModel.create({
+      state,
+      enovy: envoy._id,
+      candidate: envoy.candidate_id,
+      boxMember: boxMember._id
+    })
+
+    return res.status(201).json(successResponse(201, "vote created successfully", newVoteRecord))
+  } catch (error) {
+    log.error("Error creating/updating vote record:", error);
+    return res.status(500).json(errorResponse(500, "something went wrong"));
+  }
+}
 
