@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BoxMemberInput, BoxParamsInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
+import { BoxMemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
 import { BoxesModel, BoxesType, BoxMemberModel, VoteRecordModel } from "../model/box.model";
 import City from "../model/city.model";
 import { errorResponse, successResponse } from "../utils/apiResponse";
@@ -47,21 +47,22 @@ export const createBoxHandler = async (
 
   try {
 
-    // check if box_id and boxName exist in boxes
-    const checkBox = await BoxesModel.findOne({ boxName, city_id });
-    if (!checkBox) {
-      return res.status(404).json(errorResponse(400, "Failed to register box member. No matching box was found with the provided boxName and city_id."));
-    }
-
-    // check if social number is already exist in same box
-    const checkBoxMember = await BoxMemberModel.findOne({ssn})
-    if(checkBoxMember){
+    // check if member exist 
+    const member = await BoxMemberModel.findOne({ssn})
+    if(member){
       return res.status(400).json(errorResponse(400, "ssn => social security number already exists in the same box member."));
     }
 
+    // check if box_id and boxName exist in boxes
+    const box = await BoxesModel.findOne({ boxName, city_id });
+    if (!box) {
+      return res.status(404).json(errorResponse(400, "Failed to register box member. No matching box was found with the provided boxName and city_id."));
+    }
+
+
     // Create box member
     const boxMember = await BoxMemberModel.create({
-      box_id: checkBox.id,
+      box_id: box.id,
       boxName,
       firstName,
       lastName,
@@ -103,32 +104,33 @@ export const getAllBoxesInCityHandler = async (req: Request<BoxParamsInput>, res
   }
 };
 
-// Get box by boxName & city_id query
-export const getBoxByNameAndCityId = async(req: Request, res: Response) => {
+// Get Box By boxName & city_id query
+export const getBoxByNameAndCityId = async(req: Request<{},{},{},BoxQueryInput>, res: Response) => {
   const {boxName, city_id} = req.query
+  const city_Id = Number(city_id)
   try {
-    
-    // check if box_id and boxName exist in boxes
-    const checkBox = await BoxesModel.findOne({ boxName, city_id })
-    if (!checkBox) {
+
+    // check if box_id and boxName exist and add city
+    const box: any = await BoxesModel.aggregate([
+      {$match: { boxName, city_id: city_Id } },
+      {$lookup: {from: "cities", localField: "city_id", foreignField: "city_id", as: "city"}},
+      {$unwind: '$city'},
+      {$addFields: {city: {city_id: '$city.city_id', cityName: '$city.city'}}},
+      {$project: {_id:0, id:'$_id', log:1, lat:1, boxName:1, city:{city_id:'$city.city_id', cityName: '$city.cityName'}}}
+    ])
+
+    if (box.length === 0) {
       return res.status(404).json(errorResponse(404, "Box with city_id or boxName does not exist"));
     }
 
-    const boxMember = await BoxMemberModel.find({box_id: checkBox.id}).select('-id -box_id -boxName -_id')
-
+    const boxMember = await BoxMemberModel.find({box_id: box[0].id})
     if(!boxMember){
       return res.status(404).json(errorResponse(404, `Not found any member in ${boxName}`))
     }
 
     // Format the response
     const response = {
-      boxInfo: {
-        id: checkBox.id,
-        boxName: checkBox.boxName,
-        log: checkBox.log,
-        lat: checkBox.lat,
-        city_id: checkBox.city_id
-      },
+      boxInfo: box,
       boxMember: [...boxMember]
     }
 

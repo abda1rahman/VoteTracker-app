@@ -137,7 +137,7 @@ export const getAllCandidateHandler = async(req:Request, res:Response) => {
       },
       {
         $addFields: {
-          city: '$city.city' // Extract the 'city' field from the 'city' document
+          city: {city_id:"$city.city_id", cityName: "$city.city"} // Extract the 'city' field from the 'city' document
         }
       },
       {
@@ -147,7 +147,7 @@ export const getAllCandidateHandler = async(req:Request, res:Response) => {
           lastName: 1,
           ssn: 1,
           phone: 1,
-          city: 1, // Include city name
+          city: {cityName: 1, city_id: 1}, // Include city name
           role: 1,
           id: { $toString: '$_id' } // Convert _id to string and rename it to 'id'
         }
@@ -166,40 +166,60 @@ export const getAllCandidateHandler = async(req:Request, res:Response) => {
 // Get All Envoy By Candidate Id
 export const getEnvoyByCandidateIdHandler = async(req:Request<CandidateParamsInput>, res:Response) => {
   try {
-    let {candidate_id} = req.params
+    let {candidate_id} = req.params;
     
     // get candidate
     const candidate = await CandidateModel.findById(candidate_id)
-    log.info(candidate)
     if(!candidate){
-      return res.status(404).json(errorResponse(res.statusCode, "Candidate not found"))
+      return res.status(404).json(errorResponse(404, "Candidate not found"))
     }
     
     // Get all envoy by candidate id 
-    const allEnvoy: EnvoyModelType[] = await EnvoyModel.find({candidate_id: new Types.ObjectId(candidate_id)}).populate('user_id', 'firstName lastName ssn phone city_id role')
-    if(!allEnvoy){
-      return res.status(404).json(errorResponse(res.statusCode, `Didn't find any enovy for this ${candidate_id}`))
+    const allEnvoy: EnvoyModelType[] = await EnvoyModel.aggregate([
+      {$match: {candidate_id: new Types.ObjectId(candidate_id)}},
+      {$lookup: {from: 'users', localField: 'user_id', foreignField: '_id', as: 'users'}},
+      {$unwind: '$users'},
+      {$lookup: {from: 'cities', localField: 'users.city_id', foreignField:'city_id', as: 'city'}},
+      {$unwind: '$city'},
+      {$addFields: {city: {city_id:'$city.city_id', cityName:'$city.city'}}},
+      {$project: {id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',
+        ssn:'$users.ssn', phone:'$users.phone', role:'$users.role', city:{city_id:1, cityName:1}, } }
+    ])
+    if(allEnvoy.length === 0){
+      return res.status(404).json(errorResponse(404, "cannot find any enovy for this candidate"))
     }
 
-    // Restructure the resutlt 
-    const transformedEnvoyList = allEnvoy.map((envoy: EnvoyModelType) => {
-      const {firstName, lastName, ssn, phone, city_id, role} = envoy.user_id as UserModelType
-      return {
-        id: envoy.id,
-        firstName,
-        lastName,
-        ssn,
-        phone,
-        city_id,
-        role,
-        box_id: envoy.box_id,
-        candidate_id: envoy.candidate_id,
-      }
-    });
 
-    return res.status(200).json(successResponse(res.statusCode, `All enovy for candidate_id: ${candidate_id}`, transformedEnvoyList))
+    return res.status(200).json(successResponse(200, `All enovy for candidate`, allEnvoy))
   } catch (error) {
     log.error(error)
-    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));
+    return res.status(500).json(errorResponse(500, "Something went wrong"));
 }
+}
+
+// Get All Envoy
+export const getAllEnvoyHandler = async(req:Request, res:Response) => {
+  try {
+    // get all enovy
+    const allEnvoy = await EnvoyModel.aggregate([
+      {$lookup: {from:'users', localField:'user_id', foreignField:'_id', as:'users'}},
+      {$unwind: '$users'},
+      {$lookup: {from:'cities', localField:'users.city_id', foreignField:'city_id', as:'city'}},
+      {$unwind: '$city'},
+      {$addFields: {city: {city_id:'$city.city_id', cityName:'$city.city'}}},
+      {$project: {id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',
+        ssn:'$users.ssn', phone:'$users.phone', role:'$users.role', city:{city_id:1, cityName:1}, } }
+    ])
+
+    // if not found any envoy
+    if(allEnvoy.length === 0){
+      return res.status(404).json(errorResponse(404, "cannot find any enovy for this candidate"))
+    }
+
+    res.status(200).json(successResponse(res.statusCode, "All Envoy", allEnvoy));
+  } catch (error) {
+    log.info(error);
+    log.info(error)
+    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));
+  }
 }

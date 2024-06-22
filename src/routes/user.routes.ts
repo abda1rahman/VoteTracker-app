@@ -3,6 +3,7 @@ import {
   deleteUserById,
   getAllCandidateHandler,
   getAllCityHandler,
+  getAllEnvoyHandler,
   getEnvoyByCandidateIdHandler,
   updateEnvoyHandler,
 } from "../controller/user.controller";
@@ -19,6 +20,8 @@ router.delete("/api/user/:id", deleteUserById);
 
 router.get('/api/user/getAllCandidate', getAllCandidateHandler)
 
+router.get('/api/user/getAllEnvoy', getAllEnvoyHandler)
+
 router.get('/api/user/getEnvoyByCandidate/:candidate_id', 
   validate(getCandidateParamsSchema), 
   getEnvoyByCandidateIdHandler) 
@@ -28,6 +31,7 @@ router.put(
   validate(updateEnvoySchema),
   updateEnvoyHandler
 );
+
 
 router.get("/api/allCity", getAllCityHandler);
 

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const citySchema = new mongoose.Schema({
   city_id: {
     type: Number,
+    ref: "City",
     unique: true,
   },
   city: {
