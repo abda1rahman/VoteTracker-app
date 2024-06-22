@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
   );
 });
 
-app.listen(port, host, () => {
+app.listen(port, '0.0.0.0', () => {
   log.info(`Server is running at localhost ${process.env.port}`);
 
   connect();
