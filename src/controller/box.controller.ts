@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import { BoxMemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
-import { BoxesModel, BoxesType, BoxMemberModel, VoteRecordModel } from "../model/box.model";
+import { BoxesModel, BoxesType, BoxMemberModel, VoteRecordModel, VoteRecordType } from "../model/box.model";
 import City from "../model/city.model";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
 import { EnvoyModel, EnvoyModelType } from "../model/users.model";
 import path from "path";
+import { Types } from "mongoose";
 
 export const registerBoxHandler = async (
   req: Request<{}, {}, BoxesInput>,
@@ -145,41 +146,35 @@ export const getBoxByNameAndCityId = async(req: Request<{},{},{},BoxQueryInput>,
 // Create Vote Record 
 export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>, res:Response) =>{
   try {
-    const {state, envoy_id, box_member_id} = req.body
+    const {state, envoy_id, member_id} = req.body
     
+    const [envoy, member] = await Promise.all([
+      EnvoyModel.findById(envoy_id),
+      BoxMemberModel.findById(member_id)
+    ])
+
     // Check if envoy exists
-    const envoy = await EnvoyModel.findById(envoy_id)
     if(!envoy){
       return res.status(404).json(errorResponse(404, "enovy not found"))
     }
-
-    // Check if vote record already exists, update if found
-    const voteRecord = await VoteRecordModel.findOneAndUpdate(
-      { candidate: envoy.candidate_id, boxMember: box_member_id },
-      { state },
-      { new: true, upsert: true }
-    );
-
-    // Check if voteRecord was found and updated
-  if (voteRecord) {
-    return res.status(200).json(successResponse(200, "Vote updated successfully", voteRecord));
-  }
-
-    // Check if id member exists
-    const boxMember = await BoxMemberModel.findById(box_member_id);
-    if(!boxMember){
-      return res.status(404).json(errorResponse(404, "box_member_id does not found"))
+    
+    // Check if member_id exists
+    if(!member){
+      return res.status(404).json(errorResponse(404, "member_id does not found"))
     }
 
-    // Create new vote record if not found
-    const newVoteRecord  = await VoteRecordModel.create({
-      state,
-      enovy: envoy._id,
-      candidate: envoy.candidate_id,
-      boxMember: boxMember._id
-    })
+    const filter = {envoy_id: new Types.ObjectId(envoy_id), member_id: new Types.ObjectId(member_id)};
+    const update = {state}
+    const options = {new: true, upsert: true,  setDefaultsOnInsert: true}
+    
+    // Check if vote record already exists update if not created
+    const updateVoteRecord = await VoteRecordModel.findOneAndUpdate(filter, update, options);
 
-    return res.status(201).json(successResponse(201, "vote created successfully", newVoteRecord))
+    const message = updateVoteRecord?.createdAt.getTime() === updateVoteRecord?.updatedAt.getTime() 
+    ? "Vote created successfully"
+    : "Vote updated successfully"
+  
+  return res.status(200).json(successResponse(200, message, updateVoteRecord));
   } catch (error) {
     log.error("Error creating/updating vote record:", error);
     return res.status(500).json(errorResponse(500, "something went wrong"));

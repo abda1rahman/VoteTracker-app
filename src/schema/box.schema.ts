@@ -43,10 +43,10 @@ export const createVoteRecordSchema = object({
       (id) => isValidObjectId(id),
       { message: "envoy_id must be valid id" }
     ),
-    box_member_id: string({
-      required_error: "box_member_id should be string",
+    member_id: string({
+      required_error: "member_id should be string",
     }).refine((id) => isValidObjectId(id), {
-      message: "box_member_id must be valid id",
+      message: "member_id must be valid id",
     }),
   }),
 });

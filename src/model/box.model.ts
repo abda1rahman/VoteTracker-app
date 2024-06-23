@@ -11,9 +11,11 @@ export interface BoxMemberType extends BoxMemberInput, Document {}
 
 export interface VoteRecordType extends Document {
   state: boolean;
-  envoy: mongoose.Types.ObjectId;
-  candidate: mongoose.Types.ObjectId;
-  boxMember: mongoose.Types.ObjectId;
+  envoy_id: mongoose.Types.ObjectId;
+  candidate_id: mongoose.Types.ObjectId;
+  member_id: mongoose.Types.ObjectId;
+  updatedAt: Date;
+  createdAt: Date;
 }
 
 const BoxesSchema = new mongoose.Schema({
@@ -48,10 +50,11 @@ const boxMemberSchema = new mongoose.Schema({
 
 const voteRecordSchema = new mongoose.Schema({
   state: {type: Boolean, default: false},
-  envoy: {type: Schema.Types.ObjectId, ref: "Envoy",},
-  candidate: {type: Schema.Types.ObjectId, ref: "candidates"},
-  boxMember: {type: Schema.Types.ObjectId, ref: 'box_member'}
+  envoy_id: {type: Schema.Types.ObjectId, ref: "Envoy",},
+  candidate_id: {type: Schema.Types.ObjectId, ref: "candidates"},
+  member_id: {type: Schema.Types.ObjectId, ref: 'member'}
 },{
+  timestamps: true,
   toJSON: {
     transform: function(doc, ret){
       ret.id = ret._id;
@@ -63,5 +66,5 @@ const voteRecordSchema = new mongoose.Schema({
 
 
 export const BoxesModel = mongoose.model<BoxesType>("boxes", BoxesSchema)
-export const BoxMemberModel = mongoose.model<BoxMemberType>("box_member",boxMemberSchema)
+export const BoxMemberModel = mongoose.model<BoxMemberType>("member",boxMemberSchema)
 export const VoteRecordModel = mongoose.model<VoteRecordType>('vote_record', voteRecordSchema)
