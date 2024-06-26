@@ -6,15 +6,15 @@ services:
     ports:
       - "1337:1337"
     environment:
-      NODE_ENV: ${NODE_ENV}
-      MONGO_URL_DEV: ${MONGO_URL_DEV}
-      MONGO_URL_PROD: ${MONGO_URL_PROD}
-      HOST: ${HOST}
-      PORT: ${PORT}
-      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
-      ACCESS_TOKEN_TIME: ${ACCESS_TOKEN_TIME}
-      REFRESH_TOKEN_TIME: ${RERESH_TOKEN_TIME}
-      COOKIE_EXPIRE: ${COOKIE_EXPIRE}
+      - NODE_ENV = ${NODE_ENV}
+      - MONGO_URL_DEV=${MONGO_URL_DEV}
+      - MONGO_URL_PROD=${MONGO_URL_PROD}
+      - HOST=${HOST}
+      - PORT=${PORT}
+      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+      - ACCESS_TOKEN_TIME=${ACCESS_TOKEN_TIME}
+      - REFRESH_TOKEN_TIME=${RERESH_TOKEN_TIME}
+      - COOKIE_EXPIRE=${COOKIE_EXPIRE}
     volumes:
       - vote-app:/app
       - /app/node_modules
