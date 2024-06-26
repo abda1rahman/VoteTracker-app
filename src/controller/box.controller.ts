@@ -132,7 +132,7 @@ export const getBoxByNameAndCityId = async(req: Request<{},{},{},BoxQueryInput>,
     // Format the response
     const response = {
       boxInfo: box,
-      boxMember: [...boxMember]
+      members: [...boxMember]
     }
 
     res.status(200).json(successResponse(200, "Box member", response))
@@ -163,6 +163,11 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
       return res.status(404).json(errorResponse(404, "member_id does not found"))
     }
 
+    // Check if member and envoy follow the same box_id 
+    if(member.box_id.toString() !== envoy.box_id.toString()){
+      return res.status(400).json(errorResponse(404, 'Member and envoy do not share the same box_id'))
+    }
+
     const filter = {envoy_id: new Types.ObjectId(envoy_id), member_id: new Types.ObjectId(member_id)};
     const update = {state}
     const options = {new: true, upsert: true,  setDefaultsOnInsert: true}
@@ -180,4 +185,3 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
     return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }
-

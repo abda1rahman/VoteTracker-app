@@ -32,7 +32,6 @@ router.put(
   updateEnvoyHandler
 );
 
-
 router.get("/api/allCity", getAllCityHandler);
 
 export default router;

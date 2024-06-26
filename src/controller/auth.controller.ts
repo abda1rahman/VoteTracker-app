@@ -92,6 +92,13 @@ export const registerEnvoyHandler = async (
   role = role.toLowerCase();
   password = `${ssn}@12`
   try {
+
+    // check box_id available 
+    const availableBox = await EnvoyModel.findOne({box_id, candidate_id })
+    if(availableBox){
+      return res.status(400).json(errorResponse(400, "This box is not available for registration."))
+    }
+
     const checkUser = await UsersModel.findOne({ ssn });
     if (checkUser) {
       return res

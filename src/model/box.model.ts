@@ -7,7 +7,9 @@ export interface BoxesType extends BoxesInput, Document {
   id: mongoose.Types.ObjectId,
 }
 
-export interface BoxMemberType extends BoxMemberInput, Document {}
+export interface BoxMemberType extends Omit<BoxMemberInput, 'boxName' |'city_id'>, Document {
+  box_id: mongoose.Types.ObjectId;
+}
 
 export interface VoteRecordType extends Document {
   state: boolean;
