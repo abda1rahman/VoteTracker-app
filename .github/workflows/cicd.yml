@@ -37,6 +37,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Pull image from docker hub
-        run: docker pull abdalrahman1/votetracker-app:1.0
+        run: sudo docker pull abdalrahman1/votetracker-app:1.0
       - name: Run Docker Container
         run: docker-compose up 
