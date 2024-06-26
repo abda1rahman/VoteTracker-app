@@ -39,4 +39,4 @@ jobs:
       - name: Pull image from docker hub
         run: docker pull abdalrahman1/votetracker-app:1.0
       - name: Run Docker Container
-        run: docker-compose
+        run: docker-compose up 
