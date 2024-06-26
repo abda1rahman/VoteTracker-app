@@ -16,6 +16,16 @@ jobs:
         env: 
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+          NODE_ENV: ${{secrets.NODE_ENV}}
+          MONGO_URL_DEV: ${{secrets.MONGO_URL_DEV}}
+          MONGO_URL_PROD: ${{secrets.MONGO_URL_PROD}}
+          HOST: ${{secrets.HOST}}
+          PORT: ${{secrets.PORT}}
+          ACCESS_TOKEN_SECRET: ${{secrets.ACCESS_TOKEN_SECRET}}
+          ACCESS_TOKEN_TIME: ${{secrets.ACCESS_TOKEN_TIME}}
+          RERESH_TOKEN_TIME: ${{secrets.ACCESS_TOKEN_TIME}}
+          COOKIE_EXPIRE: ${{secrets.COOKIE_EXPIRE}}
+          
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - name: Build Docker Image
         run: docker-compose build
