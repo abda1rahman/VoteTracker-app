@@ -11,7 +11,7 @@ export const createUserSchema = object({
     }),
     password: string({
       required_error: "Password is required",
-    }),
+    }).optional(),
     ssn: string({
       required_error: "SSN is required",
     }),
@@ -21,7 +21,7 @@ export const createUserSchema = object({
     city_id: number().int().min(1).max(12),
     role: z
       .string({
-        required_error: "The role is required 'admin' or 'employ' ",
+        required_error: "The role is required 'envoy' or 'candidate' ",
       })
       .refine(
         (value: string) =>
@@ -33,14 +33,39 @@ export const createUserSchema = object({
   }),
 });
 
+// Update envoy schema
+export const updateEnvoySchema = object({
+  body: object({
+    firstName: string({
+      required_error: "First name is required",
+    }).optional(),
+    lastName: string({
+      required_error: "Last name is required",
+    }).optional(),
+    password: string({
+      required_error: "Password is required",
+    }).optional(),
+    ssn: string({
+      required_error: "SSN is required",
+    }),
+    newSSN: string({
+      required_error: "newSSN is required",
+    }).optional(),
+    phone: string({
+      required_error: "Phone number is required",
+    }).optional(),
+
+  }).strict(),
+});
+
 export const createEnvoySchema = object({
   body: createUserSchema.shape.body.extend({
     box_id: string({
       required_error: "box_id is required",
     }).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
     candidate_id: string({
-      required_error: "candidateId is required"
-    })
+      required_error: "candidate_id is required"
+    }).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
   }),
 });
 
@@ -55,6 +80,17 @@ export const loginUserSchema = object({
   }),
 });
 
+// Candidate Params
+export const getCandidateParamsSchema = object({
+  params: object({
+  candidate_id: string()
+  .refine((id)=>  isValidObjectId(id), { message: "candidate_id must be valid id"})
+  })
+})
+
 export type CreateUserInput = TypeOf<typeof createUserSchema>["body"];
 export type CreateEnvoyInput = TypeOf<typeof createEnvoySchema>["body"];
+export type UpdateEnovyInput = TypeOf<typeof updateEnvoySchema>["body"]
+export type CandidateParamsInput = TypeOf<typeof getCandidateParamsSchema>['params']
 export type loginUserSchema = TypeOf<typeof loginUserSchema>["body"];
+

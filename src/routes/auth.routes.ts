@@ -1,5 +1,9 @@
 import express from "express";
-import { createEnvoySchema, createUserSchema, loginUserSchema } from "../schema/user.schema";
+import {
+  createEnvoySchema,
+  createUserSchema,
+  loginUserSchema,
+} from "../schema/user.schema";
 import validateResoure from "../middleware/validateResource";
 import {
   registerCandidateHandler,
@@ -16,18 +20,18 @@ router.post(
   registerCandidateHandler
 );
 
-// Register enovy
+// Register envoy
 router.post(
-  "/api/auth/register/enovy",
+  "/api/auth/register/envoy",
   validateResoure(createEnvoySchema),
   registerEnvoyHandler
 );
 
-
 // Register developer
-router.post("/api/auth/developer/register",
-validateResoure(createUserSchema),
-registerDeveloperHandler
+router.post(
+  "/api/auth/developer/register",
+  validateResoure(createUserSchema),
+  registerDeveloperHandler
 );
 
 router.post(

@@ -1,10 +1,17 @@
 import mongoose from "mongoose";
-import config from "config";
 import log from "./logger";
+
 
 async function connect() {
   try {
-    await mongoose.connect(config.get<string>("MONGO_URL"));
+    let MONGO_URL;
+    if(process.env.NODE_ENV === "development"){
+      MONGO_URL = process.env.MONGO_URL_DEV
+    } else if(process.env.NODE_ENV === "production") {
+      MONGO_URL = process.env.MONGO_URL_PROD
+    }
+    
+    await mongoose.connect(<string>MONGO_URL);
     log.info("Database connected");
   } catch (e) {
     log.error("Could not connected");

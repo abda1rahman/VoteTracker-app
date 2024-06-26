@@ -8,3 +8,4 @@ export default {
   RERESH_TOKEN_TIME: "7d",
   COOKIE_EXPIRE: 24 * 60 * 60 * 1000,
 };
+

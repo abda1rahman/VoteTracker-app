@@ -15,21 +15,26 @@ import {
   DeveloperModel,
   EnvoyModel,
 } from "../model/users.model";
-import { Types, ObjectId } from "mongoose";
+import { Types } from "mongoose";
 import { getUserByIdAndRole } from "../service/user.service";
 import { BoxesModel } from "../model/box.model";
+import { errorResponse, successResponse } from "../utils/apiResponse";
 
 // Resigter Candidate
 export const registerCandidateHandler = async (
   req: Request<{}, {}, CreateUserInput>,
   res: Response
 ) => {
-  let { firstName, lastName, password, city_id, phone, ssn, role } = req.body;
+  let { firstName, lastName, city_id, password, phone, ssn, role } = req.body;
   role = role.toLowerCase();
+  password = `${ssn}@12`
   try {
+    // Check user
     const checkUser = await UsersModel.findOne({ ssn });
     if (checkUser) {
-      return res.status(400).json({ message: "User or SSN already exists" });
+      return res
+        .status(400)
+        .json(errorResponse(res.statusCode, "User or SSN already exists"));
     }
     const user = await UsersModel.create({
       firstName,
@@ -40,26 +45,31 @@ export const registerCandidateHandler = async (
       city_id,
       role,
     });
-    if (user) {
-      await CandidateModel.create({ user_id: user.id });
-    }
-    const token = generateToken(user!._id as Types.ObjectId, "candidate", res);
 
+    const candidate = await CandidateModel.create({ user_id: user.id });
+
+    const token = generateToken(user!._id as Types.ObjectId, "candidate", res);
+    // Format Response
     const userJson = {
-      ...omit(user.toJSON(), "password"),
+      id: candidate!._id,
+      ...omit(user.toJSON(), ["password", "id"]),
       token,
     };
+
     res
       .status(201)
-      .json({
-        data: userJson,
-        message: "User successfully registered",
-        success: true,
-      });
+      .json(
+        successResponse(
+          res.statusCode,
+          "User successfully registered",
+          userJson
+        )
+      );
   } catch (error: any) {
     log.error(error);
-
-    res.status(409).send(error.message);
+    return res
+      .status(500)
+      .json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -71,27 +81,44 @@ export const registerEnvoyHandler = async (
   let {
     firstName,
     lastName,
-    password,
     city_id,
     phone,
     ssn,
+    password,
     role,
     box_id,
     candidate_id,
   } = req.body;
   role = role.toLowerCase();
+  password = `${ssn}@12`
   try {
+
+    // check box_id available 
+    const availableBox = await EnvoyModel.findOne({box_id, candidate_id })
+    if(availableBox){
+      return res.status(400).json(errorResponse(400, "This box is not available for registration."))
+    }
+
     const checkUser = await UsersModel.findOne({ ssn });
     if (checkUser) {
-      return res.status(400).json({ message: "User or SSN already exists" });
+      return res
+        .status(400)
+        .json(errorResponse(res.statusCode, "User or SSN already exists"));
     }
 
     // check if candidate exist
-    const checkCandidate = await CandidateModel.findById(candidate_id);
+    const checkCandidate: any = await CandidateModel.findById(
+      candidate_id
+    ).populate("user_id");
     if (!checkCandidate) {
       return res
         .status(400)
-        .json({ message: "Candidate does not exist in the system" });
+        .json(
+          errorResponse(
+            res.statusCode,
+            "candidate_id does not exist in the system"
+          )
+        );
     }
 
     // check if box id
@@ -99,11 +126,29 @@ export const registerEnvoyHandler = async (
     if (!checkBox) {
       return res
         .status(400)
-        .json({
-          success: false,
-          message: "box_id does not exist in the system",
-        });
+        .json(
+          errorResponse(res.statusCode, "box_id does not exist in the system")
+        );
     }
+
+    // check if envoy and candidate and city_id in the same city
+    if (
+      !(
+        city_id === checkCandidate!.user_id!.city_id &&
+        city_id === checkBox.city_id
+      )
+    ) {
+      return res
+        .status(400)
+        .json(
+          errorResponse(
+            res.statusCode,
+            "The city_id of the envoy does not match the city_id of the candidate and the box."
+          )
+        );
+    }
+
+    // Create user
     const user = await UsersModel.create({
       firstName,
       lastName,
@@ -113,24 +158,33 @@ export const registerEnvoyHandler = async (
       city_id,
       role,
     });
-    if (user) {
-      const envoy = await EnvoyModel.create({
-        user_id: user._id,
-        box_id: new Types.ObjectId(box_id),
-        candidate_id: new Types.ObjectId(candidate_id),
-      });
-      const token = generateToken(envoy!._id as Types.ObjectId, "envoy", res);
 
-      const userJson = {
-        ...omit(user.toJSON(), "password"),
-        token,
-      };
-      res.status(201).json(userJson);
-    }
+    // Create envoy
+    const envoy = await EnvoyModel.create({
+      user_id: user._id,
+      box_id: new Types.ObjectId(box_id),
+      candidate_id: new Types.ObjectId(candidate_id),
+    });
+    // Create token
+    const token = generateToken(envoy!._id as Types.ObjectId, "envoy", res);
+
+    // Format response
+    const userJson = {
+      id: envoy._id,
+      ...omit(user.toJSON(), ["password", "id"]),
+      token,
+    };
+
+    res
+      .status(201)
+      .json(
+        successResponse(res.statusCode, "user created successfully", userJson)
+      );
   } catch (error: any) {
     log.error(error);
-
-    res.status(409).send(error.message);
+    return res
+      .status(500)
+      .json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -141,11 +195,15 @@ export const registerDeveloperHandler = async (
 ) => {
   let { firstName, lastName, ssn, password, city_id, phone, role } = req.body;
   role = role.toLowerCase();
+  password = `${ssn}@12`
   try {
     const checkUser = await UsersModel.findOne({ ssn });
     if (checkUser) {
-      return res.status(400).json({ message: "User or SSN already exists" });
+      return res
+        .status(400)
+        .json(errorResponse(res.statusCode, "User or SSN already exists"));
     }
+
     const user = await UsersModel.create({
       firstName,
       lastName,
@@ -155,12 +213,25 @@ export const registerDeveloperHandler = async (
       city_id,
       role,
     });
-    if (user) {
-      await DeveloperModel.create({ developer_id: user._id });
-    }
-    res.status(201).json({ message: "Developer created successfully", success: true, user });
+
+    const developer = await DeveloperModel.create({ user_id: user._id });
+
+    const infoJson = {
+      ...omit(user.toJSON, ["password", "id"]),
+    };
+    res
+      .status(201)
+      .json(
+        successResponse(
+          res.statusCode,
+          "Developer created successfully",
+          infoJson
+        )
+      );
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(500)
+      .json(errorResponse(res.statusCode, "Internal server error"));
   }
 };
 
@@ -172,31 +243,40 @@ export const loginUserHandler = async (
   const { ssn, password } = req.body;
   try {
     const user = await UsersModel.findOne({ ssn });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid ssn or password" });
-    }
 
+    if (!user) {
+      return res
+        .status(401)
+        .json(errorResponse(res.statusCode, "Invalid ssn or password"));
+    }
     const match = await comparePassword(password, user?.password ?? "");
     if (!match) {
-      res.status(401).json({ message: "Invalid ssn or password" });
+      return res
+        .status(401)
+        .json(errorResponse(res.statusCode, "Invalid ssn or password"));
     }
-    const token = generateToken(user!._id, user!.role, res);
 
-    const getOtherUserField = await getUserByIdAndRole(
-      user.role,
-      user._id,
-      res
-    );
-    const mergedUserInfo = { ...getOtherUserField, ...user.toJSON(), token };
+    const token = generateToken(user!.id, user!.role, res);
+    const getOtherUserField = await getUserByIdAndRole(user.role, user.id);
+
+    const mergedUserInfo = {
+      ...getOtherUserField,
+      ...omit(user.toJSON(), ["password", "id"]),
+      token,
+    };
 
     res
       .status(200)
-      .json({
-        message: "user login successfully",
-        success: true,
-        data: { ...mergedUserInfo },
-      });
+      .json(
+        successResponse(
+          res.statusCode,
+          "user login successfully",
+          mergedUserInfo
+        )
+      );
   } catch (error) {
-    return res.status(500).json({ message: "Internal server error" });
+    return res
+      .status(500)
+      .json(errorResponse(res.statusCode, "Internal server error", error));
   }
 };
