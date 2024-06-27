@@ -48,4 +48,4 @@ jobs:
           COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
         run: |
           cd $GITHUB_WORKSPACE
-          docker-compose -f docker-compose.yml up -d
+            docker-compose up -d
