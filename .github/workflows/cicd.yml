@@ -1,3 +1,4 @@
+
 name: Deploy Node Application
 
 on:
@@ -31,9 +32,6 @@ jobs:
     steps:
       - name: Pull image from Docker Hub
         run: docker pull abdalrahman1/votetracker-app:1.0
-
-      - name: Show Workspace Contents
-        run: ls -R $GITHUB_WORKSPACE
         
       - name: Run Docker Container
         env:
@@ -47,5 +45,17 @@ jobs:
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
           COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
         run: |
-          cd $GITHUB_WORKSPACE
-            docker-compose -f docker-compose.yml up 
+          docker run -d \
+          -e NODE_ENV=${NODE_ENV} \
+          -e MONGO_URL_DEV=${MONGO_URL_DEV} \
+          -e MONGO_URL_PROD=${MONGO_URL_PROD} \
+          -e HOST=${HOST} \
+          -e PORT=${PORT} \
+          -e ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET} \
+          -e ACCESS_TOKEN_TIME=${ACCESS_TOKEN_TIME} \
+          -e REFRESH_TOKEN_TIME=${REFRESH_TOKEN_TIME} \
+          -e COOKIE_EXPIRE=${COOKIE_EXPIRE} \
+          -p 1337:1337 \
+          -v vote-app:/app \
+          -v /app/node_modules \
+          abdalrahman1/votetracker-app:1.0
