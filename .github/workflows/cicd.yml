@@ -38,5 +38,7 @@ jobs:
     steps:
       - name: Pull image from docker hub
         run: docker pull abdalrahman1/votetracker-app:1.0
+      - name: Change to app directory
+        run: cd /home/runner/work/VoteTracker-app/VoteTracker-app  
       - name: Run Docker Container
         run: docker-compose up 
