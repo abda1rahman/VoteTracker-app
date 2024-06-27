@@ -43,4 +43,6 @@ jobs:
           ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
           COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
-        run: docker-compose up -d
+        run: |
+          cd $GITHUB_WORKSPACE/VoteTracker-app
+          /usr/local/bin/docker-compose -f docker-compose.yml up -d
