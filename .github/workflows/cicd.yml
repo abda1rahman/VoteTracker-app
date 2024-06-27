@@ -12,33 +12,46 @@ jobs:
     steps:
       - name: Checkout Source
         uses: actions/checkout@v4
-      - name: Login to docker hub
-        env: 
-          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-          NODE_ENV: ${{secrets.NODE_ENV}}
-          MONGO_URL_DEV: ${{secrets.MONGO_URL_DEV}}
-          MONGO_URL_PROD: ${{secrets.MONGO_URL_PROD}}
-          HOST: ${{secrets.HOST}}
-          PORT: ${{secrets.PORT}}
-          ACCESS_TOKEN_SECRET: ${{secrets.ACCESS_TOKEN_SECRET}}
-          ACCESS_TOKEN_TIME: ${{secrets.ACCESS_TOKEN_TIME}}
-          RERESH_TOKEN_TIME: ${{secrets.ACCESS_TOKEN_TIME}}
-          COOKIE_EXPIRE: ${{secrets.COOKIE_EXPIRE}}
 
+      - name: Login to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
       - name: Build Docker Image
-        run: docker-compose build --no-cache
-      - name: Publish Image to docker hub
+        run: docker-compose -f path/to/your/docker-compose.yml build --no-cache
+
+      - name: Publish Image to Docker Hub
         run: docker push abdalrahman1/votetracker-app:1.0
 
   deploy:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Pull image from docker hub
+      - name: Pull image from Docker Hub
         run: docker pull abdalrahman1/votetracker-app:1.0
-      - name: Change to app directory
-        run: cd /home/runner/work/VoteTracker-app/VoteTracker-app  
+
       - name: Run Docker Container
-        run: docker-compose up 
+        env:
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          MONGO_URL_DEV: ${{ secrets.MONGO_URL_DEV }}
+          MONGO_URL_PROD: ${{ secrets.MONGO_URL_PROD }}
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+          ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
+          REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
+          COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
+        run: |
+          docker run -d \
+          -e NODE_ENV=${NODE_ENV} \
+          -e MONGO_URL_DEV=${MONGO_URL_DEV} \
+          -e MONGO_URL_PROD=${MONGO_URL_PROD} \
+          -e HOST=${HOST} \
+          -e PORT=${PORT} \
+          -e ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET} \
+          -e ACCESS_TOKEN_TIME=${ACCESS_TOKEN_TIME} \
+          -e REFRESH_TOKEN_TIME=${REFRESH_TOKEN_TIME} \
+          -e COOKIE_EXPIRE=${COOKIE_EXPIRE} \
+          abdalrahman1/votetracker-app:1.0
