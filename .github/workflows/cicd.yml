@@ -47,5 +47,4 @@ jobs:
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
           COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
         run: |
-          cd $GITHUB_WORKSPACE
-          docker-compose -f docker-compose.yml up -d
+          docker-compose -f $GITHUB_WORKSPACE/docker-compose.yml up -d
