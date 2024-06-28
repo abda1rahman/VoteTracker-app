@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - feature-app
+      - workflow
 
 jobs:
   build:
@@ -19,6 +20,13 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+
+      - name: Show Workspace Path
+        run: echo "Workspace path is $GITHUB_WORKSPACE"
+
+      - name: List Workspace Contents
+        run: ls -R $GITHUB_WORKSPACE
 
       - name: Build Docker Image
         run: docker-compose build --no-cache
