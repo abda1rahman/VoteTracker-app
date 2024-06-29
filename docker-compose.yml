@@ -4,7 +4,7 @@ services:
     image: abdalrahman1/votetracker-app:1.0
     build: .
     ports:
-      - "1337:1337"
+      - "80:80"
     environment:
       NODE_ENV: ${NODE_ENV}
       MONGO_URL_DEV: ${MONGO_URL_DEV}
