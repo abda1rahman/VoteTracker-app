@@ -161,7 +161,7 @@ export const getAllCandidateHandler = async(req:Request, res:Response) => {
         }
       }
     ]);
-    
+
     return res.status(200).json(successResponse(res.statusCode, "All Candidate", allCandidate))
   } catch (error) {
     log.error(error)
@@ -189,9 +189,12 @@ export const getEnvoyByCandidateIdHandler = async(req:Request<CandidateParamsInp
       {$unwind: '$users'},
       {$lookup: {from: 'cities', localField: 'users.city_id', foreignField:'city_id', as: 'city'}},
       {$unwind: '$city'},
+      {$lookup: {from: 'boxes', localField: 'envoy_id', foreignField: 'envoy_id', as: 'boxes'}},
+      {$unwind: '$boxes'},
       {$addFields: {city: {city_id:'$city.city_id', cityName:'$city.city'}}},
-      {$project: {id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',
-        ssn:'$users.ssn', phone:'$users.phone', role:'$users.role', city:{city_id:1, cityName:1}, } }
+      {$project: {envoy_id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',
+        ssn:'$users.ssn', phone:'$users.phone', role:'$users.role', city:{city_id:1, cityName:1}, 
+        boxInfo:{id:'$boxes._id', city_id:'$boxes.city_id', log:'$boxes.log', lat:'$boxes.lat', boxName:'boxes.boxName' } }}
     ])
     if(allEnvoy.length === 0){
       return res.status(404).json(errorResponse(404, "cannot find any enovy for this candidate"))
