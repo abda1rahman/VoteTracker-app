@@ -8,29 +8,14 @@ on:
       - workflow
 
 jobs:
-  cleanup:
+  
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with: 
           ref: main
-
-      - name: Stop and Remove Docker Containers
-        run: |
-          docker stop $(docker ps -aq)
-          docker rm -f $(docker ps -aq)
-
-      - name: Remove Docker Images and Volumes
-        run: |
-          docker rmi -f $(docker images -aq)
-          docker volume rm $(docker volume ls -q)
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v2
 
       - name: Show Workspace Contents
         run: ls -R $GITHUB_WORKSPACE
@@ -55,10 +40,13 @@ jobs:
         run: docker pull abdalrahman1/votetracker-app:1.0
 
       - name: List Repository Directory Contents
-        run: ls -l $GITHUB_WORKSPACE/VoteTracker-app
+        run: ls -l $GITHUB_WORKSPACE
       
       
       - name: Run Docker Container
+        run: |
+          cd $GITHUB_WORKSPACE
+          docker-compose up -d
         env:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           MONGO_URL_DEV: ${{ secrets.MONGO_URL_DEV }}
@@ -69,6 +57,3 @@ jobs:
           ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
           COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
-        run: |
-          cd /home/ubuntu/actions-runner/project/VoteTracker-app/VoteTracker-app
-            docker-compose up -d
