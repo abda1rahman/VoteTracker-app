@@ -8,7 +8,7 @@ on:
       - workflow
 
 jobs:
-  
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,7 +27,7 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build Docker Image
-        run: docker-compose -f $GITHUB_WORKSPACE/docker-compose.yml build --no-cache
+        run: docker-compose -f docker-compose.yml build --no-cache
 
       - name: Publish Image to Docker Hub
         run: docker push abdalrahman1/votetracker-app:1.0
