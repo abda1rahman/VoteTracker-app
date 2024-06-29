@@ -120,40 +120,48 @@ export const getAllCityHandler = async (req: Request, res: Response) => {
 // Get All Candidate
 export const getAllCandidateHandler = async(req:Request, res:Response) => {
   try {
-    const allCandidate = await UsersModel.aggregate([
-      {
-        $match: { role: 'candidate' } // Filter documents where role is 'candidate'
-      },
+    const allCandidate = await CandidateModel.aggregate([
       {
         $lookup: {
-          from: 'cities', // Name of the collection to join with
-          localField: 'city_id', // Field from the local (UsersModel) collection
-          foreignField: 'city_id', // Field from the foreign (cities) collection
-          as: 'city' // Name for the output array field
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "users"
         }
       },
+      { $unwind: "$users" },
       {
-        $unwind: '$city' // Unwind the 'city' array to destructure it into separate documents
+        $lookup: {
+          from: "cities", // Name of the collection to join with
+          localField: "users.city_id", // Field from the local (UsersModel) collection
+          foreignField: "city_id", // Field from the foreign (cities) collection
+          as: "city" // Name for the output array field
+        }
       },
+      { $unwind: "$city" },
       {
         $addFields: {
-          city: {city_id:"$city.city_id", cityName: "$city.city"} // Extract the 'city' field from the 'city' document
+          city: {
+            city_id: "$city.city_id",
+            cityName: "$city.city"
+          } // Extract the 'city' field from the 'city' document
         }
       },
       {
         $project: {
-          _id: 0,
-          firstName: 1,
-          lastName: 1,
-          ssn: 1,
-          phone: 1,
-          city: {cityName: 1, city_id: 1}, // Include city name
-          role: 1,
-          id: { $toString: '$_id' } // Convert _id to string and rename it to 'id'
+          _id:0,
+          id: {$toString: '$_id'},
+          firstName: '$users.firstName',
+          lastName: '$users.lastName',
+          ssn: '$users.ssn',
+          phone: '$users.phone',
+          city: {cityName: 1, city_id: 1},
+          role: '$users.role',
+          
         }
       }
     ]);
-
+    
     return res.status(200).json(successResponse(res.statusCode, "All Candidate", allCandidate))
   } catch (error) {
     log.error(error)
