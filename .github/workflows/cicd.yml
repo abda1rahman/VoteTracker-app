@@ -14,8 +14,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with: 
-          ref: main
 
       - name: Show Workspace Contents
         run: ls -R $GITHUB_WORKSPACE
