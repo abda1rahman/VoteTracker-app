@@ -27,7 +27,7 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build Docker Image
-        run: docker-compose -f docker-compose.yml build --no-cache
+        run: docker-compose build --no-cache
 
       - name: Publish Image to Docker Hub
         run: docker push abdalrahman1/votetracker-app:1.0
