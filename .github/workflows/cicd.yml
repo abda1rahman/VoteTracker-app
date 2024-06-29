@@ -52,8 +52,9 @@ jobs:
       - name: Pull image from Docker Hub
         run: docker pull abdalrahman1/votetracker-app:1.0
 
-      - name: Output Workspace Path
-        run: echo "Workspace path is $GITHUB_WORKSPACE"
+      - name: List Repository Directory Contents
+        run: ls -l $GITHUB_WORKSPACE/VoteTracker-app
+      
       
       - name: Run Docker Container
         env:
@@ -67,5 +68,5 @@ jobs:
           REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
           COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}
         run: |
-          cd /home/runner/work/VoteTracker-app/VoteTracker-app
+          cd /home/ubuntu/actions-runner/project/VoteTracker-app/VoteTracker-app
             docker-compose up -d
