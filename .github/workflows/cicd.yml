@@ -8,9 +8,8 @@ on:
       - workflow
 
 jobs:
-
   build:
-    runs-on: self-hoted
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -39,8 +38,7 @@ jobs:
 
       - name: List Repository Directory Contents
         run: ls -l $GITHUB_WORKSPACE
-      
-      
+
       - name: Run Docker Container
         run: |
           docker-compose up -d
