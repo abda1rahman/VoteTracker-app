@@ -25,8 +25,7 @@ export const registerCandidateHandler = async (
   req: Request<{}, {}, CreateUserInput>,
   res: Response
 ) => {
-  let { firstName, lastName, city_id, password, phone, ssn, role } = req.body;
-  role = role.toLowerCase();
+  let { firstName, lastName, city_id, password, phone, ssn } = req.body;
   password = `${ssn}@12`
   try {
     // Check user
@@ -43,7 +42,7 @@ export const registerCandidateHandler = async (
       ssn,
       phone,
       city_id,
-      role,
+      role: 'candidate',
     });
 
     const candidate = await CandidateModel.create({ user_id: user.id });
@@ -85,11 +84,9 @@ export const registerEnvoyHandler = async (
     phone,
     ssn,
     password,
-    role,
     box_id,
     candidate_id,
   } = req.body;
-  role = role.toLowerCase();
   password = `${ssn}@12`
   try {
 
@@ -156,7 +153,7 @@ export const registerEnvoyHandler = async (
       ssn,
       phone,
       city_id,
-      role,
+      role: "envoy",
     });
 
     // Create envoy
@@ -193,8 +190,7 @@ export const registerDeveloperHandler = async (
   req: Request<{}, {}, CreateUserInput>,
   res: Response
 ) => {
-  let { firstName, lastName, ssn, password, city_id, phone, role } = req.body;
-  role = role.toLowerCase();
+  let { firstName, lastName, ssn, password, city_id, phone } = req.body;
   password = `${ssn}@12`
   try {
     const checkUser = await UsersModel.findOne({ ssn });
@@ -211,7 +207,7 @@ export const registerDeveloperHandler = async (
       phone,
       password,
       city_id,
-      role,
+      role: 'developer',
     });
 
     const developer = await DeveloperModel.create({ user_id: user._id });
