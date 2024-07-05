@@ -1,22 +1,24 @@
 import mongoose from "mongoose";
 import log from "./logger";
 
-
 async function connect() {
   try {
     let MONGO_URL;
-    if(process.env.NODE_ENV === "development"){
-      MONGO_URL = process.env.MONGO_URL_DEV
-    } else if(process.env.NODE_ENV === "production") {
-      MONGO_URL = process.env.MONGO_URL_PROD
-    }
-    
+
+    MONGO_URL = process.env.NODE_ENV === "development"
+        ? process.env.MONGO_URL_DEV
+        : process.env.NODE_ENV === "production"
+        ? process.env.MONGO_URL_PROD
+        : process.env.NODE_ENV === 'testing'
+        ? process.env.MONGO_URL_TEST
+        : ""
+
     await mongoose.connect(<string>MONGO_URL);
     log.info("Database connected");
   } catch (e) {
-    log.error("Could not connected");
+    log.error(e,"Could not connected");
     process.exit(1);
   }
 }
 
-export default connect
+export default connect;
