@@ -1,29 +1,54 @@
-name: Deploy Node Application 
+name: Deploy Node Application
 
-on: 
-  push: 
-    branches: 
+on:
+  push:
+    branches:
       - main
       - feature-app
+      - workflow
 
 jobs:
-  build: 
-    runs-on: ubuntu-latest 
-    steps: 
-      - name: Checkout Source
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v4
-      - name: Login to docker hub
-        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+
+      - name: Show Workspace Contents
+        run: ls -R $GITHUB_WORKSPACE
+
+      - name: Login to Docker Hub
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
       - name: Build Docker Image
-        run: docker-compose build 
-      - name: Publish Image to docker hub
-        run: docker push abdalrahman1/votetracker-app:latest
+        run: docker-compose build --no-cache
+
+      - name: Publish Image to Docker Hub
+        run: docker push abdalrahman1/votetracker-app:1.0
 
   deploy:
     needs: build
     runs-on: self-hosted
-    steps: 
-      - name: Pull image from docker hub
-        run: docker pull abdalrahman1/votetracker-app:latest
-      - name: Run Docker Container 
-        run: docker-compose 
+    steps:
+      - name: Pull image from Docker Hub
+        run: docker pull abdalrahman1/votetracker-app:1.0
+
+      - name: List Repository Directory Contents
+        run: ls -l $GITHUB_WORKSPACE
+
+      - name: Run Docker Container
+        run: |
+          docker-compose up -d
+        env:
+          NODE_ENV: ${{ secrets.NODE_ENV }}
+          MONGO_URL_DEV: ${{ secrets.MONGO_URL_DEV }}
+          MONGO_URL_PROD: ${{ secrets.MONGO_URL_PROD }}
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
+          ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+          ACCESS_TOKEN_TIME: ${{ secrets.ACCESS_TOKEN_TIME }}
+          REFRESH_TOKEN_TIME: ${{ secrets.REFRESH_TOKEN_TIME }}
+          COOKIE_EXPIRE: ${{ secrets.COOKIE_EXPIRE }}

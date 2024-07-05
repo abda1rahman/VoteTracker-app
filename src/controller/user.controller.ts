@@ -120,36 +120,44 @@ export const getAllCityHandler = async (req: Request, res: Response) => {
 // Get All Candidate
 export const getAllCandidateHandler = async(req:Request, res:Response) => {
   try {
-    const allCandidate = await UsersModel.aggregate([
-      {
-        $match: { role: 'candidate' } // Filter documents where role is 'candidate'
-      },
+    const allCandidate = await CandidateModel.aggregate([
       {
         $lookup: {
-          from: 'cities', // Name of the collection to join with
-          localField: 'city_id', // Field from the local (UsersModel) collection
-          foreignField: 'city_id', // Field from the foreign (cities) collection
-          as: 'city' // Name for the output array field
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "users"
         }
       },
+      { $unwind: "$users" },
       {
-        $unwind: '$city' // Unwind the 'city' array to destructure it into separate documents
+        $lookup: {
+          from: "cities", // Name of the collection to join with
+          localField: "users.city_id", // Field from the local (UsersModel) collection
+          foreignField: "city_id", // Field from the foreign (cities) collection
+          as: "city" // Name for the output array field
+        }
       },
+      { $unwind: "$city" },
       {
         $addFields: {
-          city: {city_id:"$city.city_id", cityName: "$city.city"} // Extract the 'city' field from the 'city' document
+          city: {
+            city_id: "$city.city_id",
+            cityName: "$city.city"
+          } // Extract the 'city' field from the 'city' document
         }
       },
       {
         $project: {
-          _id: 0,
-          firstName: 1,
-          lastName: 1,
-          ssn: 1,
-          phone: 1,
-          city: {cityName: 1, city_id: 1}, // Include city name
-          role: 1,
-          id: { $toString: '$_id' } // Convert _id to string and rename it to 'id'
+          _id:0,
+          id: {$toString: '$_id'},
+          firstName: '$users.firstName',
+          lastName: '$users.lastName',
+          ssn: '$users.ssn',
+          phone: '$users.phone',
+          city: {cityName: 1, city_id: 1},
+          role: '$users.role',
+          
         }
       }
     ]);
@@ -181,9 +189,12 @@ export const getEnvoyByCandidateIdHandler = async(req:Request<CandidateParamsInp
       {$unwind: '$users'},
       {$lookup: {from: 'cities', localField: 'users.city_id', foreignField:'city_id', as: 'city'}},
       {$unwind: '$city'},
+      {$lookup: {from: 'boxes', localField: 'envoy_id', foreignField: 'envoy_id', as: 'boxes'}},
+      {$unwind: '$boxes'},
       {$addFields: {city: {city_id:'$city.city_id', cityName:'$city.city'}}},
-      {$project: {id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',
-        ssn:'$users.ssn', phone:'$users.phone', role:'$users.role', city:{city_id:1, cityName:1}, } }
+      {$project: {envoy_id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',
+        ssn:'$users.ssn', phone:'$users.phone', role:'$users.role', city:{city_id:1, cityName:1}, 
+        boxInfo:{id:'$boxes._id', city_id:'$boxes.city_id', log:'$boxes.log', lat:'$boxes.lat', boxName:'boxes.boxName' } }}
     ])
     if(allEnvoy.length === 0){
       return res.status(404).json(errorResponse(404, "cannot find any enovy for this candidate"))
