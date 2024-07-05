@@ -4,7 +4,9 @@ import bcrypt from "bcrypt";
 import { CreateUserInput } from "../schema/user.schema";
 
 // All Types For Model Database
-export interface UserModelType extends CreateUserInput, Document {}
+export interface UserModelType extends CreateUserInput, Document {
+  role: "candidate" | "envoy" | "developer"
+}
 
 export interface CandidteModelType extends Document {
   user_id: mongoose.Types.ObjectId ;

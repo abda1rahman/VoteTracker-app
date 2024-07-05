@@ -19,19 +19,8 @@ export const createUserSchema = object({
       required_error: "Phone number is required",
     }),
     city_id: number().int().min(1).max(12),
-    role: z
-      .string({
-        required_error: "The role is required 'envoy' or 'candidate' ",
-      })
-      .refine(
-        (value: string) =>
-          ["envoy", "candidate", "developer"].includes(value.toLowerCase()),
-        {
-          message: "Role must be either 'envoy' or 'candidate' or 'developer'",
-        }
-      ),
-  }),
-});
+})
+})
 
 // Update envoy schema
 export const updateEnvoySchema = object({
