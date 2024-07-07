@@ -5,7 +5,6 @@ import City from "../model/city.model";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
 import { EnvoyModel, EnvoyModelType } from "../model/users.model";
-import path from "path";
 import { Types } from "mongoose";
 
 export const registerBoxHandler = async (

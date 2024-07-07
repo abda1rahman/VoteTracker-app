@@ -175,7 +175,7 @@ export const registerEnvoyHandler = async (
     res
       .status(201)
       .json(
-        successResponse(res.statusCode, "user created successfully", userJson)
+        successResponse(res.statusCode, "envoy created successfully", userJson)
       );
   } catch (error: any) {
     log.error(error);
