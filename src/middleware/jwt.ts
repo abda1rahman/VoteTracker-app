@@ -1,12 +1,11 @@
 import {Response } from "express";
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
 import log from "../utils/logger";
 
 
 
 export const generateToken = (
-  userId: Types.ObjectId,
+  userId: string,
   role: string,
   res: Response
 ): string => {

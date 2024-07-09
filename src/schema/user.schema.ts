@@ -11,7 +11,7 @@ export const createUserSchema = object({
     }),
     password: string({
       required_error: "Password is required",
-    }).optional(),
+    }),
     ssn: string({
       required_error: "SSN is required",
     }),

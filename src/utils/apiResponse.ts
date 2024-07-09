@@ -4,7 +4,7 @@ interface ApiResponse<T> {
   success: boolean;
   message?: string;
   status?: number;
-  result: T;
+  result?: T | null;
 }
 
 interface ApiResponseError {
@@ -17,14 +17,15 @@ interface ApiResponseError {
 
 export function successResponse<T>(
   statusCode = 200,
-  message: string,
+  message = "",
   result: T
 ): ApiResponse<T> {
+   
   return {
     success: true,
     status: statusCode,
     message,
-    result,
+    result: result === undefined ? null : result
   };
 }
 
