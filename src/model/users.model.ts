@@ -17,7 +17,7 @@ export interface EnvoyModelType extends Document {
   candidate_id: mongoose.Types.ObjectId;
 }
 export interface DeveloperModelType extends Document {
-  developer_id: mongoose.Types.ObjectId;
+  user_id: mongoose.Types.ObjectId;
 }
 
 
