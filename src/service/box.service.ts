@@ -4,9 +4,9 @@ import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
 
-type Ibox = {
+export type Ibox = {
 id: string;
-} & BoxesInput | null
+} & BoxesInput
 
 type Irecord = {} & Omit<VoteRecordType, 'candidate_id'> | null
 
@@ -43,18 +43,18 @@ try {
   return {
     ...box.toJSON(),
     id: box.id.toString()
-  };
+  } as Ibox
 } catch (error:any) {
   logger.error(error);
   throw new Error(error);
 }
 }
 
-async function findBox(city_id: number, boxName: string):Promise<Ibox>{
+async function findBox(city_id: number, boxName: string):Promise<Ibox | null>{
   try {
     const box = await BoxesModel.findOne({ city_id, boxName });
 
-    if(!box) return null;
+    if(!box) return null
 
     return {
       ...box.toJSON(),

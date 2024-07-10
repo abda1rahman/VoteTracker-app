@@ -102,8 +102,8 @@ async function findEnvoyAndMember(envoy_id:string, member_id:string){
 
 async function findEnvoyById(id:string){
   try {
-    const enovy = await EnvoyModel.findById(id);
-    return enovy
+    const envoy = await EnvoyModel.findById(id);
+    return envoy
   } catch (error:any) {
     log.error(error)
     throw new Error(error);

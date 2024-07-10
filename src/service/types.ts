@@ -1,11 +1,15 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { CandidteModelType, UserModelType } from "../model/users.model";
 import { CreateUserInput } from "../schema/user.schema";
 
 export namespace AuthTypes {
   export type Icandidate = {
     id: string;
-    role: "candidate" | "envoy" | "developer";
+    _id: Types.ObjectId;
+    user_id: Types.ObjectId
+    createdAt: Date;
+    updatedAt: Date
+    role: "candidate"
   } & Omit<CreateUserInput, "password">;
 
   export type IenvoyInput = {
