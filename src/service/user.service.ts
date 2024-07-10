@@ -10,6 +10,7 @@ import { omit } from "lodash";
 import log from "../utils/logger";
 import City from "../model/city.model";
 import { BoxMemberModel } from "../model/box.model";
+import { ICandidateUser } from "./types";
 
 type IenvoyData = {
   firstName?:string;
@@ -19,7 +20,6 @@ type IenvoyData = {
   user_id:string;
   newSSN?:string;
 }
-
 
  async function getUserByIdAndRole(
   role: string,
@@ -58,7 +58,7 @@ type IenvoyData = {
 async function findUserBySsn(ssn: string) {
   try {
     const user = await UsersModel.findOne({ssn})
-
+    
     return user;
   } catch (error: any) {
     log.error(error)
@@ -66,11 +66,10 @@ async function findUserBySsn(ssn: string) {
   }
 }
 
-async function findCandidateById(candidate_id: string){
+async function findCandidateById(candidate_id: string):Promise<ICandidateUser>{
   try {
-    const candidate = await CandidateModel.findById(candidate_id).populate("user_id");
-    return candidate
-
+    const candidate = await CandidateModel.findById(candidate_id).populate("user_id") 
+    return candidate as ICandidateUser
   } catch (error:any) {
     log.error(error)
     throw new Error(error)

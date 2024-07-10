@@ -72,6 +72,7 @@ export const registerEnvoyHandler = async (
     candidate_id,
   } = req.body;
   password = `${ssn}@12`;
+  console.log('pass level 1');
 
   try {
     // check box_id available
@@ -99,7 +100,7 @@ export const registerEnvoyHandler = async (
       return res.status(400).json(errorResponse(res.statusCode, 
             "box_id does not exist in the system"));
     }
-
+    console.log('pass level 2');
     // check if envoy and candidate and city_id in the same city
     if (
       !(
@@ -112,6 +113,7 @@ export const registerEnvoyHandler = async (
     }
     // Create envoy
     const envoy = await createEnvoy({firstName, lastName, password, ssn, phone, city_id, box_id, candidate_id})
+    console.log('pass level 3');
 
     // Create token
     const token = generateToken(envoy.id, "envoy", res);

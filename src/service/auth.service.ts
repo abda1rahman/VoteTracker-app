@@ -3,31 +3,9 @@ import { CandidateModel, DeveloperModel, EnvoyModel, UsersModel } from "../model
 import { Types } from "mongoose";
 import log from "../utils/logger";
 import { CreateUserInput } from "../schema/user.schema";
+import { AuthTypes } from "./types";
 
-type Icandidate = {
-id: string;
-role: "candidate" | "envoy" | "developer";
-} & Omit<CreateUserInput, 'password'> ;
-
-type IenvoyInput = {
-  box_id: string;
-  candidate_id: string;
-} & CreateUserInput
-
-type Ienvoy = {
-id: string;
-box_id: string;
-candidate_id: string;
-role: "candidate" | "envoy" | "developer";
-} & Omit<CreateUserInput, 'password'>
-
-type Ideveloper = {
-  id: string;
-  role: "candidate" | "envoy" | "developer";
-} & Omit<CreateUserInput, 'password'>;
-
-
- async function createCandidate(Data: CreateUserInput):Promise<Icandidate>{
+ async function createCandidate(Data: CreateUserInput):Promise<AuthTypes.Icandidate>{
   try {
         const {firstName, lastName, password, ssn, phone, city_id} = Data
     const user = await UsersModel.create({
@@ -44,7 +22,7 @@ type Ideveloper = {
 
     const candidateData = {...omit(user.toJSON(), ['_id', 'password', 'user_id']),
       ...candidate.toJSON(),id:candidate.id.toString(), 
-    } as Icandidate
+    } as AuthTypes.Icandidate
 
     return candidateData;
   } catch (error: any) {
@@ -52,7 +30,7 @@ type Ideveloper = {
   }
 }
 
-async function createEnvoy(Data: IenvoyInput):Promise<Ienvoy>{
+async function createEnvoy(Data: AuthTypes.IenvoyInput):Promise<AuthTypes.Ienvoy>{
   try {
     const {firstName, lastName, password, ssn, phone, city_id, box_id, candidate_id} = Data
         // Create user
@@ -79,7 +57,7 @@ async function createEnvoy(Data: IenvoyInput):Promise<Ienvoy>{
             id:envoy.id.toString(),
             box_id: envoy.box_id.toString(),
             candidate_id: envoy.candidate_id.toString()
-        } as Ienvoy
+        } as AuthTypes.Ienvoy
 
         return enovyData
   } catch (error:any) {
@@ -88,7 +66,7 @@ async function createEnvoy(Data: IenvoyInput):Promise<Ienvoy>{
   }
 }
 
-async function createDeveloper(Data: CreateUserInput):Promise<Ideveloper> {
+async function createDeveloper(Data: CreateUserInput):Promise<AuthTypes.Ideveloper> {
   try {
     const {firstName, lastName, ssn, phone, password, city_id} = Data
 
@@ -108,7 +86,7 @@ async function createDeveloper(Data: CreateUserInput):Promise<Ideveloper> {
       ...omit(user.toJSON(), ["_id", "password", 'user_id']),
       ...omit(developer.toJSON(), '__v'),
       id: developer.id.toString(),
-    } as Ideveloper
+    } as AuthTypes.Ideveloper
 
     return developerData;
   } catch (error:any) {

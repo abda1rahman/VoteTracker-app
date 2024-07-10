@@ -8,9 +8,7 @@ type Ibox = {
 id: string;
 } & BoxesInput | null
 
-type Irecord = {
-
-} & Omit<VoteRecordType, 'candidate_id'> | null
+type Irecord = {} & Omit<VoteRecordType, 'candidate_id'> | null
 
 async function findBoxByCandidateAndId(box_id: string, candidate_id: string){
 try {
@@ -32,7 +30,8 @@ async function findBoxById(box_id:string){
   }
 }
 
-async function createBox(log:number, lat:number, boxName:string, city_id:number):Promise<Ibox>{
+async function createBox(boxData:BoxesInput):Promise<Ibox>{
+  const {log, lat, boxName, city_id} = boxData;
 try {
   const box = await BoxesModel.create({
     log,
