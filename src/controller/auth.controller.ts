@@ -47,7 +47,7 @@ export const registerCandidateHandler = async (
     const userJson = {...candidate, token};
 
     res.status(201)
-      .json(successResponse(res.statusCode,"User successfully registered", userJson));
+      .json(successResponse(res.statusCode,"Candidate successfully registered", userJson));
   } catch (error: any) {
     log.error(error);
     return res
@@ -100,7 +100,6 @@ export const registerEnvoyHandler = async (
       return res.status(400).json(errorResponse(res.statusCode, 
             "box_id does not exist in the system"));
     }
-    console.log('pass level 2');
     // check if envoy and candidate and city_id in the same city
     if (
       !(
@@ -123,12 +122,8 @@ export const registerEnvoyHandler = async (
       ...envoy,
       token
     };
-    console.log('pass level 4');
-    res
-      .status(201)
-      .json(
-        successResponse(res.statusCode, "envoy created successfully", userJson)
-      );
+
+    res.status(201).json(successResponse(res.statusCode, "envoy created successfully", userJson));
   } catch (error: any) {
     log.error(error);
     return res

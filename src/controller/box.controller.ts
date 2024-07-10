@@ -5,7 +5,6 @@ import log from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
 import { createBox, createMember, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, updateVoteRecord } from "../service/box.service";
 
-
 export const registerBoxHandler = async (
   req: Request<{}, {}, BoxesInput>,
   res: Response
