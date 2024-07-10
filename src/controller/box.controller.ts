@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import { BoxMemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
-import { EnvoyModel, EnvoyModelType } from "../model/users.model";
-import path from "path";
-import { Types } from "mongoose";
+import { findCity, findEnvoyAndMember } from "../service/user.service";
+import { createBox, createMember, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, updateVoteRecord } from "../service/box.service";
 
 export const registerBoxHandler = async (
   req: Request<{}, {}, BoxesInput>,
