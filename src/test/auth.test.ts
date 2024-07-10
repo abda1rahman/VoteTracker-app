@@ -4,29 +4,36 @@ import connect from "../utils/connect"
 import mongoose from "mongoose";
 import {faker} from '@faker-js/faker'
 import { generateRandomNumber } from "../utils/helper";
-import { createBox } from "../service/box.service";
+import { createBox, Ibox } from "../service/box.service";
 import log from "../utils/logger";
 import { createCandidate } from "../service/auth.service";
-import { deleteCandidateById, findCandidateById } from "../service/user.service";
+import { deleteCandidateById, deleteEnvoyById, findCandidateById, findEnvoyById, findUserBySsn } from "../service/user.service";
 import { EnvoyModelType } from "../model/users.model";
 import { CreateEnvoyInput } from "../schema/user.schema";
+import { IEnvoyUser } from "./types";
 
 const request = supertest(createServer())
 
 let box_id = '';
 let candidate_id = '';
+let userCandidate = '';
+let envoy_id = '';
+let userEnvoyId = '';
+
 
 beforeAll(async()=> {
   await connect()
 
   const box = await createBoxForTest()
   const candidate = await createCandidateForTest()
-  box_id = box!.id;
-  candidate_id = candidate.id;
+
+  box_id = box.id.toString()
+  candidate_id = candidate.id.toString();
+  userCandidate = candidate.user_id.toString()
 })
 afterAll(async()=> {
-  let {user_id: {_id: userId}}:any = await findCandidateById(candidate_id)
-  await deleteCandidateById(userId.toString(), candidate_id)
+  // Clean up test data after all tests
+  await clearupTestData()
   await mongoose.disconnect()
 })
 
@@ -34,7 +41,7 @@ describe('POST /api/auth/register/candidate', ()=> {
   test('should register candidate and return status 201', async()=> {
     // Example input data 
     const candidateData  = {
-      firstName: "cand",
+      firstName: "candtest",
       lastName: faker.internet.userName(),
       ssn: generateRandomNumber(),
       password:'123456',
@@ -45,13 +52,12 @@ describe('POST /api/auth/register/candidate', ()=> {
       const response =  await request
       .post('/api/auth/register/candidate')
       .send(candidateData )
-      .then(res=> {
 
         // Assertions
-        expect(res.status).toBe(201)
-        expect(res.body).toEqual(expect.objectContaining({
+        expect(response.status).toBe(201)
+        expect(response.body).toEqual(expect.objectContaining({
           status: 201,
-          message: 'User successfully registered',
+          message: 'Candidate successfully registered',
           result: expect.objectContaining({
             id: expect.any(String),
             firstName: expect.any(String),
@@ -63,17 +69,17 @@ describe('POST /api/auth/register/candidate', ()=> {
             token: expect.any(String)
           })
         }))
-      })
+
 
 
   })
 })
 
-describe.only('POST /api/auth/register/envoy', ()=> {
+describe('POST /api/auth/register/envoy', ()=> {
   test('should register envoy and return 201', async()=> {
 
   const envoyData:CreateEnvoyInput  = {
-    firstName: "envoy",
+    firstName: "envoytest",
     lastName: faker.internet.userName(),
     ssn: generateRandomNumber(),
     city_id: 1,
@@ -84,11 +90,10 @@ describe.only('POST /api/auth/register/envoy', ()=> {
       const response = await request
       .post('/api/auth/register/envoy')
       .send(envoyData)
-
+      
       expect(response.status).toBe(201);
       expect(response.body.message).toBe('envoy created successfully')
       expect(response.body.success).toBe(true)
-
       expect(response.body.result.id).toEqual(expect.any(String));
       expect(response.body.result.firstName).toEqual(expect.any(String));
       expect(response.body.result.lastName).toEqual(expect.any(String));
@@ -97,7 +102,8 @@ describe.only('POST /api/auth/register/envoy', ()=> {
       expect(response.body.result.city_id).toEqual(expect.any(Number));
       expect(response.body.result.role).toEqual('envoy'); // Assuming role is 'envoy' for envoy
       expect(response.body.result.token).toEqual(expect.any(String));
-
+      envoy_id = response.body.result.id.toString();
+      userEnvoyId = response.body.result.user_id.toString()
   })
 })
 
@@ -110,8 +116,8 @@ async function createBoxForTest(){
 }
 
 try {
-  const box = await createBox(boxData)
-  return box
+  const box = await createBox(boxData) 
+  return box as Ibox
 } catch (error) {
   log.info('error_register_box: ', error)
   fail(error)
@@ -130,9 +136,16 @@ async function createCandidateForTest(){
     }
     const candidate = await createCandidate(candidateData)
 
-    return candidate
+    return candidate 
   } catch (error:any) {
     log.error(error);
     fail(error)
   }
+}
+
+async function clearupTestData() {
+
+  const envoy = await findEnvoyById(envoy_id)
+  // await deleteEnvoyById(userEnvoyId, envoy_id)
+  await deleteCandidateById(userCandidate, candidate_id)
 }
