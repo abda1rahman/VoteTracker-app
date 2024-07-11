@@ -1,7 +1,7 @@
 import express from "express";
 import validateResoure from "../middleware/validateResource";
 import { createBoxMemberSchema, createBoxesSchema, createVoteRecordSchema, getBoxNameAndCityIdSchema, getBoxesByCitySchema } from "../schema/box.schema";
-import { createBoxHandler, createVoteRecordHandler, getAllBoxesInCityHandler, getBoxByNameAndCityIdHandler, registerBoxHandler } from "../controller/box.controller";
+import { createMemberHandler, createVoteRecordHandler, getAllBoxesInCityHandler, getBoxByNameAndCityIdHandler, registerBoxHandler } from "../controller/box.controller";
 import validate from "../middleware/validateResource";
 
 const router = express.Router();
@@ -14,7 +14,7 @@ router.post(
 
 router.post("/api/developer/createBoxMember", 
   validateResoure(createBoxMemberSchema),
-  createBoxHandler
+  createMemberHandler
 )
 
 router.get("/api/getAllBoxesInCity/:city_id", 

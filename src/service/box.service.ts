@@ -114,7 +114,7 @@ async function getAllBoxes(city_id: string){
 async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
   try {
     const box:any = await BoxesModel.aggregate([
-      { $match: { city_id: 1, boxName: 'box101' } },
+      { $match: { city_id: 1, boxName: boxName } },
       {
         $lookup: {
           from: "cities",
