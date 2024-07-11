@@ -32,7 +32,7 @@ export const registerBoxHandler = async (
 };
 
 // Register Member in box
-export const createBoxHandler = async (
+export const createMemberHandler = async (
   req: Request<{}, {}, BoxMemberInput>,
   res: Response
 ) => {
@@ -89,7 +89,6 @@ export const getBoxByNameAndCityIdHandler = async(req: Request<{},{},{},BoxQuery
   const {boxName, city_id} = req.query
   const city_Id = Number(city_id)
   try {
-
     // get boxInfo and members
     const box = await getBoxByNameAndCity_id(boxName, city_Id)
 
