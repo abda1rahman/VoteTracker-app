@@ -1,5 +1,5 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-const baseTestDir = '<rootDir>/src/test/*auth.test.ts'
+const baseTestDir = '<rootDir>/src/test/*box.test.ts'
 module.exports = {
 
   preset: 'ts-jest',
