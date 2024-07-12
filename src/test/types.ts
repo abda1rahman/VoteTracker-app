@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Document, ObjectId, Types } from "mongoose";
 import { CreateEnvoyInput } from "../schema/user.schema";
 import { EnvoyModelType } from "../model/users.model";
 
