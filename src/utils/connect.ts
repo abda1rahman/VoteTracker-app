@@ -1,23 +1,9 @@
 import mongoose from "mongoose";
 import log from "./logger";
 
-
 async function connect() {
   try {
     let MONGO_URL;
-<<<<<<< Updated upstream
-    if(process.env.NODE_ENV === "development"){
-      MONGO_URL = process.env.MONGO_URL_DEV
-    } else if(process.env.NODE_ENV === "production") {
-      MONGO_URL = process.env.MONGO_URL_PROD
-    }
-    
-    await mongoose.connect(<string>MONGO_URL);
-    log.info("Database connected");
-  } catch (e) {
-    log.error("Could not connected");
-    process.exit(1);
-=======
 
     switch (process.env.NODE_ENV) {
       case "development":
@@ -30,22 +16,20 @@ async function connect() {
         MONGO_URL = process.env.MONGO_URL_TEST;
         break;
       default:
-        MONGO_URL = "";
-        break;
+        throw new Error("NODE_ENV is not set to a recognized environment");
     }
 
     if (!MONGO_URL) {
-      throw new Error("MongoDB URL not specified for current environment");
+      throw new Error("MongoDB URL is not specified for the current environment");
     }
 
     await mongoose.connect(MONGO_URL);
 
-    log.info("Database connected");
+    log.info("Database connected successfully");
   } catch (error) {
-    log.error(error, "Could not connect to database");
-    throw error; // Re-throw the error to propagate it or handle it accordingly
->>>>>>> Stashed changes
+    log.error("Could not connect to database", error);
+    throw error; // Re-throw the error to be handled by higher-level code or process exit
   }
 }
 
-export default connect
+export default connect;
