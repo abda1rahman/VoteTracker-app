@@ -121,11 +121,8 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
     if(member.box_id.toString() !== envoy.box_id.toString()){
       return res.status(400).json(errorResponse(404, 'Member and envoy do not share the same box_id'))
     }
-
- 
     
-    // Check if vote record already exists update if not created
-    
+    // Check if vote record already exists update if not created    
     const VoteRecord = await updateVoteRecord(envoy_id, member_id, state)
 
     const message = VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime() 
