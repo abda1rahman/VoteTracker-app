@@ -5,8 +5,8 @@ import { CreateUserInput } from "../schema/user.schema";
 export namespace AuthTypes {
   export type Icandidate = {
     id: string;
-    role: "candidate" | "envoy" | "developer";
-  } & Omit<CreateUserInput, "password">;
+    role: "candidate"
+  } & Omit<CreateUserInput, 'password'>;
 
   export type IenvoyInput = {
     box_id: string;
@@ -17,12 +17,12 @@ export namespace AuthTypes {
     id: string;
     box_id: string;
     candidate_id: string;
-    role: "candidate" | "envoy" | "developer";
+    role: "envoy" 
   } & Omit<CreateUserInput, "password">;
 
   export type Ideveloper = {
     id: string;
-    role: "candidate" | "envoy" | "developer";
+    role: "developer";
   } & Omit<CreateUserInput, "password">;
 }
 
