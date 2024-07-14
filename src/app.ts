@@ -4,7 +4,7 @@ import cookieParaser from "cookie-parser";
 
 import log from "./utils/logger";
 import {connectDB} from "./utils/connect";
-import router from "./routes/index";
+import router from "./routes/index.router";
 import dotenv from "dotenv";
 
 const app = express();

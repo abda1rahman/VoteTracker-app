@@ -196,7 +196,7 @@ async function searchQueryMember(search:string) {
     if(Number.isFinite(Number(search))){
       searchResponse = await BoxMemberModel.find({identity: search});
     } else {
-       searchResponse = await BoxMemberModel.find({$text: {$search: search}})
+       searchResponse = await BoxMemberModel.find({$text: {$search:`\"${search}\"` }})
       .limit(10).sort({firstName: -1})
     }    
 
