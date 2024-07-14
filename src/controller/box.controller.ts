@@ -3,8 +3,10 @@ import { BoxMemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordIn
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
-import { createBox, createMember, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, updateVoteRecord } from "../service/box.service";
+import { createBox, createMember, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord } from "../service/box.service";
 
+
+// Register Box
 export const registerBoxHandler = async (
   req: Request<{}, {}, BoxesInput>,
   res: Response
@@ -132,6 +134,25 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
   return res.status(200).json(successResponse(200, message, VoteRecord));
   } catch (error) {
     log.error("Error creating/updating vote record:", error);
+    return res.status(500).json(errorResponse(500, "something went wrong"));
+  }
+}
+
+
+// Search Member
+export const getMemberSearchHandler = async(req:Request, res:Response) => {
+  try {
+    const query = req.query.query as string;
+
+    const response = await searchQueryMember(query)
+
+    if(response.length < 1 ){
+      return res.status(200).json(successResponse(200, 'no result found', null))
+    }
+
+    return res.status(200).json(successResponse(200, 'result found', response))
+  } catch (error:any) {
+    log.error('Error member search', error.message);
     return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }

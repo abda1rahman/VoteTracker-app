@@ -1,7 +1,7 @@
 import express from "express";
 import validateResoure from "../middleware/validateResource";
 import { createBoxMemberSchema, createBoxesSchema, createVoteRecordSchema, getBoxNameAndCityIdSchema, getBoxesByCitySchema } from "../schema/box.schema";
-import { createMemberHandler, createVoteRecordHandler, getAllBoxesInCityHandler, getBoxByNameAndCityIdHandler, registerBoxHandler } from "../controller/box.controller";
+import { createMemberHandler, createVoteRecordHandler, getAllBoxesInCityHandler, getBoxByNameAndCityIdHandler, getMemberSearchHandler, registerBoxHandler } from "../controller/box.controller";
 import validate from "../middleware/validateResource";
 
 const router = express.Router();
@@ -30,6 +30,10 @@ getBoxByNameAndCityIdHandler
 router.post('/api/user/createRecord',
   validate(createVoteRecordSchema),
   createVoteRecordHandler
+)
+
+router.get('/api/user/search',
+  getMemberSearchHandler
 )
 
 export default router;

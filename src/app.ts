@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParaser from "cookie-parser";
 
 import log from "./utils/logger";
-import connect from "./utils/connect";
+import {connectDB} from "./utils/connect";
 import router from "./routes/index";
 import dotenv from "dotenv";
 
@@ -31,5 +31,5 @@ app.get("/", (req, res) => {
 app.listen(port, '0.0.0.0', () => {
   log.info(`Server is running at localhost ${process.env.port}`);
 
-  connect();
+  connectDB();
 });

@@ -1,7 +1,6 @@
 import mongoose, {Document, Schema} from "mongoose";
 import { BoxesInput, BoxMemberInput } from "../schema/box.schema";
 
-
 // Type for box 
 export interface BoxesType extends BoxesInput, Document {
   id: mongoose.Types.ObjectId,
@@ -40,6 +39,7 @@ const boxMemberSchema = new mongoose.Schema({
   firstName: {type: String, default: ""},
   lastName: {type: String, default: ""},
   ssn: {type: String, required: true},
+  identity: {type: Number}
 },{
   toJSON: {
     transform: function(doc, ret){
@@ -49,6 +49,9 @@ const boxMemberSchema = new mongoose.Schema({
     }
   }
 })
+
+boxMemberSchema.index({ firstName: 'text' });
+boxMemberSchema.index({ identity: 1 });
 
 const voteRecordSchema = new mongoose.Schema({
   state: {type: Boolean, default: false},

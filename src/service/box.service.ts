@@ -190,6 +190,23 @@ try {
 }
 }
 
+async function searchQueryMember(search:string) {
+  try {
+    let searchResponse
+    if(Number.isFinite(Number(search))){
+      searchResponse = await BoxMemberModel.find({identity: search});
+    } else {
+       searchResponse = await BoxMemberModel.find({$text: {$search: search}})
+      .limit(10).sort({firstName: -1})
+    }    
+
+    return searchResponse;
+  } catch (error:any) {
+    logger.error('Search query error:', error);
+    throw new Error('Failed to perform search query');
+  }
+}
+
 export {
   findBoxByCandidateAndId,
   findBoxById,
@@ -199,5 +216,6 @@ export {
   createMember,
   getAllBoxes,
   getBoxByNameAndCity_id,
-  updateVoteRecord
+  updateVoteRecord,
+  searchQueryMember
 }
