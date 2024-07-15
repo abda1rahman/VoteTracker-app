@@ -228,7 +228,7 @@ async function getEnvoyByCandidateId(candidate_id: Types.ObjectId){
       {$unwind: '$users'},
       {$lookup: {from: 'cities', localField: 'users.city_id', foreignField:'city_id', as: 'city'}},
       {$unwind: '$city'},
-      {$lookup: {from: 'boxes', localField: 'envoy_id', foreignField: 'envoy_id', as: 'boxes'}},
+      {$lookup: {from: 'boxes', localField: 'box_id', foreignField: '_id', as: 'boxes'}},
       {$unwind: '$boxes'},
       {$addFields: {city: {city_id:'$city.city_id', cityName:'$city.city'}}},
       {$project: {envoy_id:'$_id', _id: 0, candidate_id:1, firstName:'$users.firstName', lastName:'$users.lastName',

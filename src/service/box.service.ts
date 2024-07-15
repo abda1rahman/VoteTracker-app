@@ -197,7 +197,7 @@ async function searchQueryMember(search:string) {
       searchResponse = await BoxMemberModel.find({identity: search});
     } else {
        searchResponse = await BoxMemberModel.find({$text: {$search:`\"${search}\"` }})
-      .limit(10).sort({firstName: -1})
+      .limit(6).sort({firstName: -1})
     }    
 
     return searchResponse;
