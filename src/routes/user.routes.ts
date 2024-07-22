@@ -23,21 +23,21 @@ function loggingMiddleware(req: Request, res: Response, next: NextFunction) {
 router.delete("/api/user/:id", deleteUserById);
 
 // Get all candidate
-router.get("/api/user/getAllCandidate", getAllCandidateHandler);
+router.get("/api/user/candidates", getAllCandidateHandler);
 
 // Get all envoys by candidateId
 router.get(
-  "/api/user/getEnvoyByCandidate/:candidate_id",
+  "/api/envoys/byCandidate/:candidate_id",
   validate(getCandidateParamsSchema),
   getEnvoyByCandidateIdHandler
 );
 
 // Get all envoys
-router.get("/api/user/getAllEnvoy", getAllEnvoyHandler);
+router.get("/api/envoys", getAllEnvoyHandler);
 
 // Update envoy
 router.put(
-  "/api/envoy/update",
+  "/api/envoys",
   validate(updateEnvoySchema),
   updateEnvoyHandler
 );
@@ -45,6 +45,6 @@ router.put(
 router.get('/api/envoyId')
 
 // Get all city in jordan
-router.get("/api/allCity", getAllCityHandler);
+router.get("/api/cities", getAllCityHandler);
 
 export default router;
