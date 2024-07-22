@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BoxMemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
+import { MemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
@@ -35,7 +35,7 @@ export const registerBoxHandler = async (
 
 // Register Member in box
 export const createMemberHandler = async (
-  req: Request<{}, {}, BoxMemberInput>,
+  req: Request<{}, {}, MemberInput>,
   res: Response
 ) => {
   const { boxName, firstName, lastName, ssn, city_id } = req.body;

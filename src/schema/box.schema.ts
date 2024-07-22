@@ -1,6 +1,6 @@
 import { isValidObjectId } from "mongoose";
-import { object, string, number, TypeOf, boolean } from "zod";
-
+import { object, string, number, TypeOf, nativeEnum  } from "zod";
+import {IStateRecord} from "../model/box.model"
 export const createBoxesSchema = object({
   body: object({
     city_id: number({
@@ -15,7 +15,7 @@ export const createBoxesSchema = object({
   }),
 });
 
-export const createBoxMemberSchema = object({
+export const createMemberSchema = object({
   body: object({
     // box_id: string({required_error: "box_id is required"}).refine(id => isValidObjectId(id), {message: "Invalid ObjectId format"}),
     city_id: number({
@@ -36,8 +36,8 @@ export const createBoxMemberSchema = object({
 // Vote Record Schema
 export const createVoteRecordSchema = object({
   body: object({
-    state: boolean({
-      required_error: "state should be true or false",
+    state: nativeEnum(IStateRecord,{
+      required_error: "Invalid voting status provided. Must be one of: 0, 1, 2, 3.",
     }),
     envoy_id: string({ required_error: "envoy_id should be string" }).refine(
       (id) => isValidObjectId(id),
@@ -87,7 +87,7 @@ export const getBoxNameAndCityIdSchema = object({
 });
 
 export type BoxesInput = TypeOf<typeof createBoxesSchema>["body"];
-export type BoxMemberInput = TypeOf<typeof createBoxMemberSchema>["body"];
+export type MemberInput = TypeOf<typeof createMemberSchema>["body"];
 export type VoteRecordInput = TypeOf<typeof createVoteRecordSchema>["body"];
 
 export type BoxParamsInput = TypeOf<typeof getBoxesByCitySchema>["params"];

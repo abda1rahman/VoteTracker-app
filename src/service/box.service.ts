@@ -1,5 +1,5 @@
 import { Types } from "mongoose"
-import { BoxMemberModel, BoxesModel, VoteRecordModel, VoteRecordType } from "../model/box.model"
+import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord } from "../model/box.model"
 import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
@@ -68,7 +68,7 @@ async function findBox(city_id: number, boxName: string):Promise<Ibox>{
 
 async function findMemberBySsn(ssn: string){
   try {
-    const member = await BoxMemberModel.findOne({ssn})
+    const member = await MemberModel.findOne({ssn})
 
     return member;
   } catch (error:any) {
@@ -79,7 +79,7 @@ async function findMemberBySsn(ssn: string){
 
 async function createMember(firstName:string, lastName:string, ssn:string, boxName:string, box_id:string){
   try {
-    const member = await BoxMemberModel.create({
+    const member = await MemberModel.create({
       box_id,
       boxName,
       firstName,
@@ -175,7 +175,7 @@ async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
   }
 }
 
-async function updateVoteRecord(envoy_id:string, member_id:string, state:boolean):Promise<Irecord>{
+async function updateVoteRecord(envoy_id:string, member_id:string, state:IStateRecord):Promise<Irecord>{
 try {
   const filter = {envoy_id: new Types.ObjectId(envoy_id), member_id: new Types.ObjectId(member_id)};
   const update = {state}
@@ -194,9 +194,9 @@ async function searchQueryMember(search:string) {
   try {
     let searchResponse
     if(Number.isFinite(Number(search))){
-      searchResponse = await BoxMemberModel.find({identity: search});
+      searchResponse = await MemberModel.find({identity: search});
     } else {
-       searchResponse = await BoxMemberModel.find({$text: {$search:`\"${search}\"` }})
+       searchResponse = await MemberModel.find({$text: {$search:`\"${search}\"` }})
       .limit(6).sort({firstName: -1})
     }    
 

@@ -1,6 +1,6 @@
 import express from "express";
 import validateResoure from "../middleware/validateResource";
-import { createBoxMemberSchema, createBoxesSchema, createVoteRecordSchema, getBoxNameAndCityIdSchema, getBoxesByCitySchema } from "../schema/box.schema";
+import { createMemberSchema, createBoxesSchema, createVoteRecordSchema, getBoxNameAndCityIdSchema, getBoxesByCitySchema } from "../schema/box.schema";
 import { createMemberHandler, createVoteRecordHandler, getAllBoxesInCityHandler, getBoxByNameAndCityIdHandler, getMemberSearchHandler, registerBoxHandler } from "../controller/box.controller";
 import validate from "../middleware/validateResource";
 
@@ -13,7 +13,7 @@ router.post(
 );
 
 router.post("/api/developer/createBoxMember", 
-  validateResoure(createBoxMemberSchema),
+  validateResoure(createMemberSchema),
   createMemberHandler
 )
 

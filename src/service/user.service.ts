@@ -9,7 +9,7 @@ import {
 import { omit } from "lodash";
 import log from "../utils/logger";
 import City from "../model/city.model";
-import { BoxMemberModel } from "../model/box.model";
+import { MemberModel } from "../model/box.model";
 import { ICandidateUser } from "./types";
 
 type IenvoyData = {
@@ -90,7 +90,7 @@ async function findEnvoyAndMember(envoy_id:string, member_id:string){
  try {
   const [envoy, member]:any = await Promise.all([
     EnvoyModel.findById(envoy_id),
-    BoxMemberModel.findById(member_id)
+    MemberModel.findById(member_id)
   ])
   
   return {envoy, member}
