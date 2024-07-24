@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { CandidteModelType, UserModelType } from "../model/users.model";
 import { CreateUserInput } from "../schema/user.schema";
+import { text } from "body-parser";
 
 export namespace AuthTypes {
   export type Icandidate = {
@@ -19,7 +20,7 @@ export namespace AuthTypes {
     candidate_id: string;
     role: "envoy" 
   } & Omit<CreateUserInput, "password">;
-
+  let test : Ienvoy
   export type Ideveloper = {
     id: string;
     role: "developer";
@@ -33,3 +34,31 @@ export type ICandidateUser = {
   id: mongoose.Types.ObjectId
   user_id: UserModelType
 } & Document | null
+
+export type IEnvoyInfo = {
+  envoy: {
+    firstName: string;
+    lastName: string;
+    ssn: string;
+    phone: string;
+    city_id: number;
+    role: 'envoy';
+    createdAt: Date;
+    updatedAt: Date;
+    city: string;
+    id: string;
+};
+  box: {
+    id: string;
+    city_id: number;
+    log: number;
+    lat: number;
+    boxName: string;
+    city: string;
+};
+totalMember: number;
+vote: number;
+notVote: number;
+secret: number;
+others: number;
+}

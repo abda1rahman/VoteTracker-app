@@ -15,7 +15,7 @@ try {
   const box = await EnvoyModel.findOne({ box_id, candidate_id })
   return box
 } catch (error: any) {
-  logger.error(error)
+      logger.error("Error in service findBoxByCandidateAndId", error.message);
   throw new Error(error)
 }
 }
@@ -25,7 +25,7 @@ async function findBoxById(box_id:string){
     const box = await BoxesModel.findById(box_id);
     return box;
   } catch (error: any) {
-    logger.error(error)
+        logger.error("Error in service findBoxById", error.message);
     throw new Error(error)
   }
 }
@@ -45,7 +45,7 @@ try {
     id: box.id.toString()
   };
 } catch (error:any) {
-  logger.error(error);
+  logger.error("Error in service createBox", error.message);
   throw new Error(error);
 }
 }
@@ -61,7 +61,7 @@ async function findBox(city_id: number, boxName: string):Promise<Ibox>{
       id:box.id.toString()
     }
   } catch (error:any) {
-    logger.error(error)
+    logger.error("Error in service findBox", error.message);
     throw new Error(error)
   }
 }
@@ -72,7 +72,7 @@ async function findMemberBySsn(ssn: string){
 
     return member;
   } catch (error:any) {
-    logger.error(error)
+    logger.error("Error in service findMemberBySsn", error.message);
     throw new Error(error)
   }
 }
@@ -89,7 +89,7 @@ async function createMember(firstName:string, lastName:string, ssn:string, boxNa
 
     return member
   } catch (error:any) {
-    logger.error(error)
+    logger.error("Error in service createMember", error.message);
     throw new Error(error)
   }
 }
@@ -106,7 +106,7 @@ async function getAllBoxes(city_id: string){
 
     return allBox
   } catch (error:any) {
-    logger.error(error);
+    logger.error("Error in service getAllBoxes", error.message);
     throw new Error(error)
   }
 }
@@ -170,7 +170,7 @@ async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
 
     return box[0]
   } catch (error:any) {
-    logger.error(error);
+    logger.error("Error in service getBoxByNameAndCity_id", error.message);
     throw new Error(error)
   }
 }
@@ -185,7 +185,7 @@ try {
 
   return VoteRecord
 } catch (error:any) {
-  logger.error(error);
+  logger.error("Error in service updateVoteRecord", error.message);
   throw new Error(error);
 }
 }
@@ -202,7 +202,7 @@ async function searchQueryMember(search:string) {
 
     return searchResponse;
   } catch (error:any) {
-    logger.error('Search query error:', error);
+    logger.error("Error in service searchQueryMember", error.message);
     throw new Error('Failed to perform search query');
   }
 }

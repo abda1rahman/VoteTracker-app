@@ -27,7 +27,7 @@ import { AuthTypes } from "./types";
 
     return candidateData as AuthTypes.Icandidate;
   } catch (error: any) {
-    log.error(error);
+    log.error("Error in service createCandidate", error.message);
     throw new Error(error);
   }
 }
@@ -61,7 +61,7 @@ async function createEnvoy(Data: AuthTypes.IenvoyInput):Promise<AuthTypes.Ienvoy
     return envoyData as  AuthTypes.Ienvoy
 
   } catch (error:any) {
-    log.error(error)
+    log.error("Error in service createEnvoy", error.message);
     throw new Error(error)
   }
 }
@@ -88,7 +88,7 @@ async function createDeveloper(Data: CreateUserInput):Promise<AuthTypes.Idevelop
     return developerData as AuthTypes.Ideveloper
     
   } catch (error:any) {
-    log.error(error);
+    log.error("Error in service createDeveloper", error.message);
     throw new Error(error)
   }
 }

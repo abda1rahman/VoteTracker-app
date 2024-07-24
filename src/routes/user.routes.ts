@@ -5,12 +5,14 @@ import {
   getAllCityHandler,
   getAllEnvoyHandler,
   getEnvoyByCandidateIdHandler,
+  getEnvoyDetails1Handler,
   updateEnvoyHandler,
 } from "../controller/user.controller";
 import validate from "../middleware/validateResource";
 import {
   updateEnvoySchema,
   getCandidateParamsSchema,
+  getEnvoyVoteInfoSchema,
 } from "../schema/user.schema";
 const router = express.Router();
 
@@ -42,7 +44,10 @@ router.put(
   updateEnvoyHandler
 );
 
-router.get('/api/envoyId')
+
+router.get('/api/envoys/voteInfo/:envoyId', 
+  validate(getEnvoyVoteInfoSchema),
+  getEnvoyDetails1Handler)
 
 // Get all city in jordan
 router.get("/api/cities", getAllCityHandler);

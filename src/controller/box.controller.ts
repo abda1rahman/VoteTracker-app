@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { MemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
 import { errorResponse, successResponse } from "../utils/apiResponse";
-import log from "../utils/logger";
+import logger from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
 import { createBox, createMember, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord } from "../service/box.service";
 
@@ -27,8 +27,8 @@ export const registerBoxHandler = async (
 
     res.status(201).json(successResponse(201, "Box created successfully", {...box,city: cityJordan!.city} ));
 
-  } catch (error) {
-    console.error(error);
+  } catch (error:any) {
+    logger.error('Error in controller registerBoxHandler', error.message)
     return res.status(500).json(errorResponse(500, "Something went wrong while register box", error));
   }
 };
@@ -59,8 +59,8 @@ export const createMemberHandler = async (
 
     res.status(201).json(successResponse(201, "Box member created successfully", Member));
 
-  } catch (error) {
-    log.error(error);
+  } catch (error:any) {
+    logger.error('Error in controller createMemberHandler', error.message)
     return res.status(500).json(errorResponse(500, "Internal server error"));
   }
 };
@@ -80,8 +80,8 @@ export const getAllBoxesInCityHandler = async (req: Request<BoxParamsInput>, res
 
     // Respond with the retrieved boxes
     res.status(200).json(successResponse(200, "All Boxes", allBox))
-  } catch (error) {
-    log.error(error)
+  } catch (error:any) {
+    logger.error('Error in controller getAllBoxesInCityHandler', error.message)
     return res.status(500).json(errorResponse(500, "Internal server error"));
   }
 };
@@ -96,8 +96,8 @@ export const getBoxByNameAndCityIdHandler = async(req: Request<{},{},{},BoxQuery
 
     res.status(200).json(successResponse(200, "Box member", box))
 
-  } catch (error) {
-    log.error(error);
+  } catch (error:any) {
+    logger.error('Error in controller getBoxByNameAndCityIdHandler', error.message)
     return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }
@@ -132,8 +132,8 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
     : "Vote updated successfully"
   
   return res.status(200).json(successResponse(200, message, VoteRecord));
-  } catch (error) {
-    log.error("Error creating/updating vote record:", error);
+  } catch (error:any) {
+    logger.error('Error in controller createVoteRecordHandler', error.message)
     return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }
@@ -152,7 +152,7 @@ export const getMemberSearchHandler = async(req:Request, res:Response) => {
 
     return res.status(200).json(successResponse(200, 'result found', response))
   } catch (error:any) {
-    log.error('Error member search', error.message);
+    logger.error('Error in controller getMemberSearchHandler', error.message)
     return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }
