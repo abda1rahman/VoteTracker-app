@@ -3,6 +3,7 @@ import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord 
 import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
+import { IMembersInfo } from "./types"
 
 type Ibox = {
 id: string;
@@ -207,6 +208,86 @@ async function searchQueryMember(search:string) {
   }
 }
 
+async function getMembersDataVote(envoy_id: string) {
+  try {
+    const pipeline = [
+      { $match: { _id: new Types.ObjectId(envoy_id) } },
+      {
+        $lookup: {
+          from: 'boxes',
+          localField: 'box_id',
+          foreignField: '_id',
+          as: 'boxes'
+        }
+      },
+      {
+        $lookup: {
+          from: 'members',
+          let: { boxId: { $arrayElemAt: ['$boxes._id', 0] } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ['$box_id', '$$boxId'] }
+              }
+            },
+            {
+              $lookup: {
+                from: 'vote_records',
+                let: { memberId: '$_id' },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ['$member_id', '$$memberId'] }
+                    }
+                  }
+                ],
+                as: 'records'
+              }
+            },
+            {
+              $project: {
+                id: '$_id',
+                _id: 0,
+                box_id: 1,
+                firstName: 1,
+                lastName: 1,
+                ssn: 1,
+                state: {
+                  $cond: {
+                    if: { $gt: [{ $size: '$records' }, 0] },
+                    then: { $arrayElemAt: ['$records.state', 0] },
+                    else: 0
+                  }
+                }
+              }
+            }
+          ],
+          as: 'members'
+        }
+      },
+      {
+        $unset:[
+        'boxes.__v'  
+        ]
+      },
+      {
+        $project: {
+          boxName: {$arrayElemAt: ['$boxes.boxName', 0]},
+          members: 1,
+          _id:0,
+        }
+      }
+    ]
+    const members: IMembersInfo[] | IMembersInfo  = await EnvoyModel.aggregate(pipeline);
+
+    return members[0]
+
+  } catch (error:any) {
+    logger.error("Error in service getMembersDataVote", error.message);
+    throw new Error(error);
+  }
+}
+
 export {
   findBoxByCandidateAndId,
   findBoxById,
@@ -217,5 +298,6 @@ export {
   getAllBoxes,
   getBoxByNameAndCity_id,
   updateVoteRecord,
-  searchQueryMember
+  searchQueryMember,
+  getMembersDataVote
 }

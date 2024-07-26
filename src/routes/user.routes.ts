@@ -12,7 +12,7 @@ import validate from "../middleware/validateResource";
 import {
   updateEnvoySchema,
   getCandidateParamsSchema,
-  getEnvoyVoteInfoSchema,
+  getEnvoyParamsSchema,
 } from "../schema/user.schema";
 const router = express.Router();
 
@@ -44,9 +44,9 @@ router.put(
   updateEnvoyHandler
 );
 
-
+// Get envoy vote info
 router.get('/api/envoys/voteInfo/:envoyId', 
-  validate(getEnvoyVoteInfoSchema),
+  validate(getEnvoyParamsSchema),
   getEnvoyDetails1Handler)
 
 // Get all city in jordan

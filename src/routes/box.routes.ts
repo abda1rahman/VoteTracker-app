@@ -10,12 +10,14 @@ import {
 import {
   createMemberHandler,
   createVoteRecordHandler,
+  exportMembersHandler,
   getAllBoxesInCityHandler,
   getBoxByNameAndCityIdHandler,
   getMemberSearchHandler,
   registerBoxHandler,
 } from "../controller/box.controller";
 import validate from "../middleware/validateResource";
+import { getEnvoyParamsSchema } from "../schema/user.schema";
 
 const router = express.Router();
 
@@ -49,6 +51,10 @@ router.post(
   validate(createVoteRecordSchema),
   createVoteRecordHandler
 );
+
+router.get('/api/members/export/:envoyId',
+  validate(getEnvoyParamsSchema),
+  exportMembersHandler)
 
 router.get("/api/users/search", getMemberSearchHandler);
 

@@ -61,7 +61,7 @@ const MemberSchema = new mongoose.Schema(
 );
 
 MemberSchema.index({ firstName: "text" });
-MemberSchema.index({ identity: 1 });
+MemberSchema.index({ box_id: 1 });
 
 const voteRecordSchema = new mongoose.Schema(
   {
@@ -80,6 +80,9 @@ const voteRecordSchema = new mongoose.Schema(
     },
   }
 );
+
+voteRecordSchema.index({envoy_id: 1})
+voteRecordSchema.index({member_id: 1})
 
 export const BoxesModel = mongoose.model<BoxesType>("boxes", BoxesSchema);
 export const MemberModel = mongoose.model<MemberType>(

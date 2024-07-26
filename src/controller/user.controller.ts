@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { Types, isValidObjectId } from "mongoose";
-import { CandidateModel, EnvoyModel, UsersModel, EnvoyModelType, UserModelType } from "../model/users.model";
+import { isValidObjectId } from "mongoose";
+import { CandidateModel, UsersModel, EnvoyModelType } from "../model/users.model";
 import City from "../model/city.model";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import log from "../utils/logger";
@@ -156,3 +156,4 @@ export const getEnvoyDetails1Handler = async(req:Request, res:Response) => {
     return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));
   }
 }
+

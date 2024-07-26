@@ -62,3 +62,17 @@ notVote: number;
 secret: number;
 others: number;
 }
+
+export type Imember = {
+  box_id: string
+  firstName: string
+  lastName: string 
+  ssn: string
+  id: string
+  state: 0 | 1 | 2 | 3 
+}
+
+export type IMembersInfo = {
+members: Imember[];
+boxName: string
+}

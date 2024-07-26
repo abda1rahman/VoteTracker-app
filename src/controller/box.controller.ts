@@ -3,7 +3,8 @@ import { MemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import logger from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
-import { createBox, createMember, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord } from "../service/box.service";
+import { createBox, createMember, getMembersDataVote, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord } from "../service/box.service";
+import { exportExcel } from "../utils/exportExcel";
 
 
 // Register Box
@@ -154,5 +155,19 @@ export const getMemberSearchHandler = async(req:Request, res:Response) => {
   } catch (error:any) {
     logger.error('Error in controller getMemberSearchHandler', error.message)
     return res.status(500).json(errorResponse(500, "something went wrong"));
+  }
+}
+
+export const exportMembersHandler = async(req:Request, res:Response) => {
+  try {
+    const {envoyId} = req.params
+    // get all members data with vote state for envoy
+    const membersInfo = await getMembersDataVote(envoyId)
+
+    await exportExcel(membersInfo, res)
+
+  } catch (error:any) {
+    logger.error('Error in controller exportMembersHandler', error.message)
+    return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));
   }
 }
