@@ -164,8 +164,9 @@ export const exportMembersHandler = async(req:Request, res:Response) => {
     // get all members data with vote state for envoy
     const membersInfo = await getMembersDataVote(envoyId)
 
-    await exportExcel(membersInfo, res)
+    const {url, fileName } = await exportExcel(membersInfo,envoyId, res)
 
+    return res.status(200).json(successResponse(200, 'create file excel successfully', {url, fileName}))
   } catch (error:any) {
     logger.error('Error in controller exportMembersHandler', error.message)
     return res.status(500).json(errorResponse(res.statusCode, "Something went wrong"));

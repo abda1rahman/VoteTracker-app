@@ -3,8 +3,12 @@ import { IMembersInfo } from '../service/types'
 import { Response } from 'express'
 import log from './logger'
 import { IStateRecord } from '../model/box.model'
+import { v4 as uuidv4 } from 'uuid'
+import fs from 'fs'
+import path from 'path'
+import { uploadExcelToCloudinary } from './upload'
 
-export async function exportExcel(membersInfo: IMembersInfo, res: Response){
+export async function exportExcel(membersInfo: IMembersInfo, envoyId:string, res: Response){
 try {
   let {members, boxName} = membersInfo
   boxName = convertBoxToArabic(boxName)
@@ -63,12 +67,25 @@ try {
     });
     headerCell.alignment = { horizontal: 'center' };
 
-  // Set response headers for Excel file download
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', 'attachment; filename=members.xlsx');
+    // Ensure the directory exists
+    const tempDir = path.join(__dirname, 'excelFile');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
 
-  await workbook.xlsx.write(res)
-  res.end()
+    // Save the workbook to temporary file
+    const fileName = 'members' + envoyId
+    const tempFilePath = path.join(tempDir, `${fileName}.xlsx`);
+  
+    await workbook.xlsx.writeFile(tempFilePath)
+
+    // Response with the URL to download file 
+    const url = await uploadExcelToCloudinary(tempFilePath, fileName)
+
+    // Clean up: remove the file after uploading
+      fs.unlinkSync(tempFilePath);
+
+    return {url, fileName};
 } catch (error:any) {
   log.error('Error in exportExcel function: ', error.message)
   throw new Error(error)
