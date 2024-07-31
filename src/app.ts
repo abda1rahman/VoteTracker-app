@@ -6,8 +6,9 @@ import log from "./utils/logger";
 import {connectDB} from "./utils/connect";
 import router from "./routes/index.router";
 import dotenv from "dotenv";
+import {app, server} from "./utils/webSocket";
+import { join } from "path";
 
-const app = express();
 
 dotenv.config();
 const port = parseInt(process.env.PORT || "3000");
@@ -22,13 +23,14 @@ app.use(
 app.use(cookieParaser());
 app.use(router);
 
+// Serve static files from the 'client' directory
+app.use(express.static(join(__dirname, '../client/public')));
+
 app.get("/", (req, res) => {
-  res.send(
-    '<h1 style="text-align:center; margin-top:5%;">VoteTracker-app (Backend Node js)</h1>'
-  );
+  res.sendFile(join(__dirname, '../clinet/public', 'index.html'))
 });
 
-app.listen(port, '0.0.0.0', () => {
+server.listen(port, '0.0.0.0', () => {
   log.info(`Server is running at localhost ${process.env.port}`);
 
   connectDB();
