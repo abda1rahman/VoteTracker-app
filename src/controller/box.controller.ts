@@ -3,8 +3,11 @@ import { MemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import logger from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
-import { createBox, createMember, getMembersDataVote, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord } from "../service/box.service";
+import { createBox, createMember, getMembersDataVote, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord, findRecordMember } from "../service/box.service";
 import { exportExcel } from "../utils/exportExcel";
+import { getCache, incrementByCache, setCache } from "../service/redis.service";
+import { IStateRecord } from "../model/box.model";
+import { updateCacheRecord } from "../utils/cacheHelper";
 
 
 // Register Box
@@ -124,13 +127,20 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
     if(member.box_id.toString() !== envoy.box_id.toString()){
       return res.status(400).json(errorResponse(404, 'Member and envoy do not share the same box_id'))
     }
-    
+
+    // Check old record state
+    const oldState = await findRecordMember(member_id)
+    console.log('oldState => findoldRecord: ', oldState);
     // Check if vote record already exists update if not created    
     const VoteRecord = await updateVoteRecord(envoy_id, member_id, state)
 
-    const message = VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime() 
+    const isCreated = VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime() 
+    const message = isCreated
     ? "Vote created successfully"
     : "Vote updated successfully"
+
+    // Update cache records 
+    await updateCacheRecord(envoy, state, oldState)
   
   return res.status(200).json(successResponse(200, message, VoteRecord));
   } catch (error:any) {

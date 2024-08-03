@@ -14,6 +14,7 @@ import {
   getCandidateParamsSchema,
   getEnvoyParamsSchema,
 } from "../schema/user.schema";
+import { getCandidateRecordResult } from "../service/box.service";
 const router = express.Router();
 
 function loggingMiddleware(req: Request, res: Response, next: NextFunction) {
@@ -51,5 +52,13 @@ router.get('/api/envoys/voteInfo/:envoyId',
 
 // Get all city in jordan
 router.get("/api/cities", getAllCityHandler);
+
+// Route for test 
+router.get('/api/test/:id', async(req,res)=> {
+const result = await getCandidateRecordResult(req.params.id)
+console.log(result);
+
+res.status(200).json(result)
+})
 
 export default router;

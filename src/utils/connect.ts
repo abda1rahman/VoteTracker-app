@@ -33,7 +33,7 @@ async function connectDB() {
 
     log.info("Database connected successfully");
   } catch (error) {
-    log.error("Could not connect to database", error);
+    log.error("Could not connect to mongodb database", error);
     throw error; // Re-throw the error to be handled by higher-level code or process exit
   }
 }
