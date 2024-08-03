@@ -13,9 +13,7 @@ cloudinary.v2.config({
 
 export async function uploadExcelToCloudinary(filePath: string, fileName: string) {
   try {
-    console.log(' process.env.CLOUD_NAME: ',process.env.CLOUD_NAME)
-    console.log(' process.env.CLOUD_API_KEY: ',process.env.CLOUD_API_KEY)
-    console.log(' process.env.COUND_API_SECRET: ',process.env.COUND_API_SECRET)
+
     // Upload the file to Cloudinary
     const result = await cloudinary.v2.uploader.upload(filePath, {
       resource_type: 'auto',

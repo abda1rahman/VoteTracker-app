@@ -130,7 +130,7 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
 
     // Check old record state
     const oldState = await findRecordMember(member_id)
-    console.log('oldState => findoldRecord: ', oldState);
+    
     // Check if vote record already exists update if not created    
     const VoteRecord = await updateVoteRecord(envoy_id, member_id, state)
 

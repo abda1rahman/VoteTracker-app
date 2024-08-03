@@ -18,7 +18,6 @@ import { getCandidateRecordResult } from "../service/box.service";
 const router = express.Router();
 
 function loggingMiddleware(req: Request, res: Response, next: NextFunction) {
-  console.log(`${req.method}  ${req.url}`);
   next();
 }
 
@@ -56,7 +55,6 @@ router.get("/api/cities", getAllCityHandler);
 // Route for test 
 router.get('/api/test/:id', async(req,res)=> {
 const result = await getCandidateRecordResult(req.params.id)
-console.log(result);
 
 res.status(200).json(result)
 })

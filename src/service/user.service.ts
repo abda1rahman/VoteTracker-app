@@ -349,7 +349,6 @@ async function getEnvoyVoteInfo(envoy_id: string) {
           as: "users"
         }
       },
-    
       {
         $lookup: {
           from: "cities",
@@ -367,14 +366,8 @@ async function getEnvoyVoteInfo(envoy_id: string) {
         }
       },
       {
-        $lookup: {
-          from: "cities",
-          localField: "users.city_id",
-          foreignField: "city_id",
-          as: "cities"
-        }
+        $unwind: "$cities"
       },
-      { $unwind: "$cities" },
       {
         $lookup: {
           from: "members",
@@ -402,15 +395,6 @@ async function getEnvoyVoteInfo(envoy_id: string) {
                   $sum: {
                     $cond: [
                       { $eq: ["$state", 1] },
-                      1,
-                      0
-                    ]
-                  }
-                },
-                notVote: {
-                  $sum: {
-                    $cond: [
-                      { $eq: ["$state", 0] },
                       1,
                       0
                     ]
@@ -449,10 +433,10 @@ async function getEnvoyVoteInfo(envoy_id: string) {
       {
         $addFields: {
           "users.id": "$_id",
-          "users.candidate_id": '$candidate_id',
+          "users.candidate_id": "$candidate_id",
           "users.city": "$cities.city",
           "boxes.city": "$cities.city",
-          "boxes.id": {$arrayElemAt: ['$boxes._id', 0]}
+          "boxes.id": { $arrayElemAt: ["$boxes._id", 0] }
         }
       },
       {
@@ -466,25 +450,33 @@ async function getEnvoyVoteInfo(envoy_id: string) {
       },
       {
         $project: {
-          envoy: {$arrayElemAt: ["$users", 0]},
-          box: {$arrayElemAt: ["$boxes", 0]},
+          envoy: { $arrayElemAt: ["$users", 0] },
+          box: { $arrayElemAt: ["$boxes", 0] },
           totalMember: { $size: "$members" },
-          vote: {$ifNull: ['$records.vote', 0]},
-          notVote: {$ifNull: [ "$records.notVote", 0]},
-          secret: {$ifNull: ["$records.secret", 0]},
-          others: {$ifNull: ["$records.others", 0]},
+          vote: { $ifNull: ["$records.vote", 0] },
+          secret: { $ifNull: ["$records.secret", 0] },
+          others: { $ifNull: ["$records.others", 0] },
+          notVote: {
+            $subtract: [
+              { $size: "$members" },
+              {
+                $add: [
+                  { $ifNull: ["$records.vote", 0] },
+                  { $ifNull: ["$records.secret", 0] },
+                  { $ifNull: ["$records.others", 0] }
+                ]
+              }
+            ]
+          },
           _id: 0
         }
       }
     ]
 
-    let envoy: IEnvoyInfo | IEnvoyInfo[] = await EnvoyModel.aggregate(pipeline)
+    let envoy: IEnvoyInfo[] = await EnvoyModel.aggregate(pipeline)
 
-    if (envoy.length > 0) 
       return envoy[0];
-    else
-     return envoy 
-
+      
   } catch (error: any) {
     log.error("Error in service getEnvoyDetails1", error.message);
     throw new Error(error);
