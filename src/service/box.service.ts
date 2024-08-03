@@ -3,7 +3,7 @@ import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord 
 import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
-import { IMembersInfo } from "./types"
+import { IcandidateResult, IMembersInfo } from "./types"
 
 type Ibox = {
 id: string;
@@ -29,6 +29,19 @@ async function findBoxById(box_id:string){
         logger.error("Error in service findBoxById", error.message);
     throw new Error(error)
   }
+}
+
+async function findRecordMember(member_id:string):Promise<IStateRecord | null>{
+try {
+  const Record = await VoteRecordModel.findOne({member_id})
+
+  if(!Record) return null;
+
+  return Record!.state
+} catch (error:any) {
+  logger.error("Error in service findRecordMember", error.message);
+  throw new Error(error);
+}
 }
 
 async function createBox(boxData:BoxesInput):Promise<Ibox>{
@@ -288,6 +301,160 @@ async function getMembersDataVote(envoy_id: string) {
   }
 }
 
+async function getCandidateRecordResult(candidate_id: string):Promise<IcandidateResult>{
+  try {
+    const pipeline = [
+      {
+        $match: {
+          candidate_id: new Types.ObjectId(candidate_id)
+        }
+      },
+      {
+        $lookup: {
+          from: "boxes",
+          localField: "box_id",
+          foreignField: "_id",
+          as: "boxes"
+        }
+      },
+      {
+        $unwind: {
+          path: "$boxes",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "members",
+          localField: "boxes._id",
+          foreignField: "box_id",
+          as: "members"
+        }
+      },
+      {
+        $unwind: {
+          path: "$members",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalMembers: {
+            $addToSet: "$members._id"
+          },
+          // Collect unique member IDs
+          records: {
+            $push: {
+              member_id: "$members._id",
+              // Collect member IDs for later lookup
+              box_id: "$boxes._id"
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "vote_records",
+          let: {
+            member_ids: "$totalMembers"
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$member_id", "$$member_ids"]
+                }
+              }
+            },
+            {
+              $group: {
+                _id: "$state",
+                count: {
+                  $sum: 1
+                }
+              }
+            }
+          ],
+          as: "state_counts"
+        }
+      },
+      {
+        $addFields: {
+          MembersCount: {
+            $size: "$totalMembers"
+          } // Count the unique members
+        }
+      },
+      {
+        $unwind: {
+          path: "$state_counts",
+          preserveNullAndEmptyArrays: true // Preserve if no state_counts
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          MembersCount: {
+            $first: "$MembersCount"
+          },
+          totalVote: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: ["$state_counts._id", 1]
+                },
+                "$state_counts.count",
+                0
+              ]
+            }
+          },
+          totalSecret: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: ["$state_counts._id", 2]
+                },
+                "$state_counts.count",
+                0
+              ]
+            }
+          },
+          totalOther: {
+            $sum: {
+              $cond: [
+                {
+                  $eq: ["$state_counts._id", 3]
+                },
+                "$state_counts.count",
+                0
+              ]
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+        totalNotVote : {
+          $subtract: [
+            '$MembersCount', {$add: ['$totalVote', '$totalOther', '$totalSecret']}
+          ]
+        }
+        }
+      },
+      {
+        $unset: '_id'
+      }
+    ]
+    
+    const result: IcandidateResult[] = await EnvoyModel.aggregate(pipeline)
+    return result[0] 
+  } catch (error:any) {
+    logger.error('Error in service getCandidateRecordResult', error.message)
+    throw new Error(error)
+  }
+}
+
 export {
   findBoxByCandidateAndId,
   findBoxById,
@@ -299,5 +466,7 @@ export {
   getBoxByNameAndCity_id,
   updateVoteRecord,
   searchQueryMember,
-  getMembersDataVote
+  getMembersDataVote,
+  findRecordMember,
+  getCandidateRecordResult
 }

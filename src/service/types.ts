@@ -27,8 +27,7 @@ export namespace AuthTypes {
   } & Omit<CreateUserInput, "password">;
 }
 
-// Types User
-
+// Types User Service
 export type ICandidateUser = {
   _id: mongoose.Types.ObjectId
   id: mongoose.Types.ObjectId
@@ -75,4 +74,13 @@ export type Imember = {
 export type IMembersInfo = {
 members: Imember[];
 boxName: string
+}
+
+// Type Box Service
+export type IcandidateResult = {
+  MembersCount: number;
+  totalVote : number;
+  totalSecret: number;
+  totalOther: number
+  totalNotVote : number;
 }
