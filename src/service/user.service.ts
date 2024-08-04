@@ -10,7 +10,7 @@ import { omit } from "lodash";
 import log from "../utils/logger";
 import City from "../model/city.model";
 import { MemberModel } from "../model/box.model";
-import { ICandidateUser, IEnvoyInfo } from "./types";
+import { ICandidateUser, IEnvoyInfo, IMemberAndEnvoy } from "./types";
 
 type IenvoyData = {
   firstName?: string;
@@ -86,9 +86,9 @@ async function findCity(city_id: number) {
   }
 }
 
-async function findEnvoyAndMember(envoy_id: string, member_id: string) {
+async function findEnvoyAndMember(envoy_id: string, member_id: string):Promise<IMemberAndEnvoy> {
   try {
-    const [envoy, member]: any = await Promise.all([
+    const [envoy, member] = await Promise.all([
       EnvoyModel.findById(envoy_id),
       MemberModel.findById(member_id),
     ]);

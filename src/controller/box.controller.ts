@@ -111,7 +111,7 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
   try {
     const {state, envoy_id, member_id} = req.body
     
-    const {envoy, member}:any = await findEnvoyAndMember(envoy_id, member_id)
+    const {envoy, member} = await findEnvoyAndMember(envoy_id, member_id)
 
     // Check if envoy exists
     if(!envoy){

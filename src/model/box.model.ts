@@ -6,11 +6,13 @@ export interface BoxesType extends BoxesInput, Document {
   id: mongoose.Types.ObjectId;
 }
 // Type member
-export interface MemberType
-  extends Omit<MemberInput, "boxName" | "city_id">,
-    Document {
+export type IMemberType = {
   box_id: mongoose.Types.ObjectId;
-}
+  firstName: string;
+  lastName: string;
+  ssn: string;
+} & Document
+
 // Type enum vote-record
 export enum IStateRecord {NOT_VOTE=0, VOTE=1, SECRET=2, OTHERS=3}
 // Type vote-record
@@ -85,7 +87,7 @@ voteRecordSchema.index({envoy_id: 1})
 voteRecordSchema.index({member_id: 1})
 
 export const BoxesModel = mongoose.model<BoxesType>("boxes", BoxesSchema);
-export const MemberModel = mongoose.model<MemberType>(
+export const MemberModel = mongoose.model<IMemberType>(
   "member",
   MemberSchema
 );

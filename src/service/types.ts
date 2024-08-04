@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
-import { CandidteModelType, UserModelType } from "../model/users.model";
+import { CandidteModelType, EnvoyModelType, UserModelType } from "../model/users.model";
 import { CreateUserInput } from "../schema/user.schema";
 import { text } from "body-parser";
+import { IMemberType } from "../model/box.model";
 
 export namespace AuthTypes {
   export type Icandidate = {
@@ -76,6 +77,11 @@ members: Imember[];
 boxName: string
 }
 
+export type IMemberAndEnvoy = {
+  envoy: EnvoyModelType | null
+  member: IMemberType | null
+}
+
 // Type Box Service
 export type IcandidateResult = {
   MembersCount: number;
@@ -84,3 +90,4 @@ export type IcandidateResult = {
   totalOther: number
   totalNotVote : number;
 }
+
