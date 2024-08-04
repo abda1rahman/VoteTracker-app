@@ -1,35 +1,61 @@
 import express from "express";
 import validateResoure from "../middleware/validateResource";
-import { createBoxMemberSchema, createBoxesSchema, createVoteRecordSchema, getBoxNameAndCityIdSchema, getBoxesByCitySchema } from "../schema/box.schema";
-import { createMemberHandler, createVoteRecordHandler, getAllBoxesInCityHandler, getBoxByNameAndCityIdHandler, registerBoxHandler } from "../controller/box.controller";
+import {
+  createMemberSchema,
+  createBoxesSchema,
+  createVoteRecordSchema,
+  getBoxNameAndCityIdSchema,
+  getBoxesByCitySchema,
+} from "../schema/box.schema";
+import {
+  createMemberHandler,
+  createVoteRecordHandler,
+  exportMembersHandler,
+  getAllBoxesInCityHandler,
+  getBoxByNameAndCityIdHandler,
+  getMemberSearchHandler,
+  registerBoxHandler,
+} from "../controller/box.controller";
 import validate from "../middleware/validateResource";
+import { getEnvoyParamsSchema } from "../schema/user.schema";
 
 const router = express.Router();
 
 router.post(
-  "/api/developer/registerBox",
+  "/api/boxes",
   validateResoure(createBoxesSchema),
   registerBoxHandler
 );
 
-router.post("/api/developer/createBoxMember", 
-  validateResoure(createBoxMemberSchema),
+router.post(
+  "/api/members",
+  validateResoure(createMemberSchema),
   createMemberHandler
-)
+);
 
-router.get("/api/getAllBoxesInCity/:city_id", 
+router.get(
+  "/api/boxes/cities/:city_id",
   validate(getBoxesByCitySchema),
   getAllBoxesInCityHandler
-)
+);
 
-router.get("/api/getBox",
-validate(getBoxNameAndCityIdSchema),
-getBoxByNameAndCityIdHandler
-)
+// Get a box details by name and city_id
+router.get(
+  "/api/boxes",
+  validate(getBoxNameAndCityIdSchema),
+  getBoxByNameAndCityIdHandler
+);
 
-router.post('/api/user/createRecord',
+router.post(
+  "/api/records",
   validate(createVoteRecordSchema),
   createVoteRecordHandler
-)
+);
+
+router.get('/api/members/export/:envoyId',
+  validate(getEnvoyParamsSchema),
+  exportMembersHandler)
+
+router.get("/api/users/search", getMemberSearchHandler);
 
 export default router;

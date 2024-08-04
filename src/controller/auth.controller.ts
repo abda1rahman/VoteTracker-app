@@ -49,10 +49,9 @@ export const registerCandidateHandler = async (
     res.status(201)
       .json(successResponse(res.statusCode,"Candidate successfully registered", userJson));
   } catch (error: any) {
-    log.error(error);
+    log.error('Error in controller registerCandidateHandler', error.message)
     return res
-      .status(500)
-      .json(errorResponse(res.statusCode, "Something went wrong"));
+      .status(500).json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -122,10 +121,9 @@ export const registerEnvoyHandler = async (
 
     res.status(201).json(successResponse(res.statusCode, "envoy created successfully", userJson));
   } catch (error: any) {
-    log.error(error);
+    log.error('Error in controller registerEnvoyHandler', error.message)
     return res
-      .status(500)
-      .json(errorResponse(res.statusCode, "Something went wrong"));
+      .status(500).json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -156,7 +154,8 @@ export const registerDeveloperHandler = async (
     };
     res.status(201).json(successResponse(res.statusCode,
       "Developer created successfully",infoJson));
-  } catch (error) {
+  } catch (error:any) {
+    log.error('Error in controller registerDeveloperHandler', error.message)
     res.status(500).json(errorResponse(res.statusCode, "Internal server error"));
   }
 };
@@ -196,7 +195,8 @@ export const loginUserHandler = async (
           mergedUserInfo
         )
       );
-  } catch (error) {
+  } catch (error:any) {
+    log.error('Error in controller loginUserHandler', error.message)
     return res
       .status(500)
       .json(errorResponse(res.statusCode, "Internal server error", error));

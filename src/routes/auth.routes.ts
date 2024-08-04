@@ -29,7 +29,7 @@ router.post(
 
 // Register developer
 router.post(
-  "/api/auth/developer/register",
+  "/api/auth/register/developer",
   validateResoure(createUserSchema),
   registerDeveloperHandler
 );

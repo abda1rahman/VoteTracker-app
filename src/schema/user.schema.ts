@@ -77,9 +77,18 @@ export const getCandidateParamsSchema = object({
   })
 })
 
+export const getEnvoyParamsSchema = object({
+  params: object({
+    envoyId: string()
+    .refine((id)=> isValidObjectId(id), {message: "envoy_id must be valid id"})
+  })
+})
+
+
 export type CreateUserInput = TypeOf<typeof createUserSchema>["body"];
 export type CreateEnvoyInput = TypeOf<typeof createEnvoySchema>["body"];
 export type UpdateEnovyInput = TypeOf<typeof updateEnvoySchema>["body"]
 export type CandidateParamsInput = TypeOf<typeof getCandidateParamsSchema>['params']
+export type EnvoyParamsInfoVoteInput = TypeOf<typeof getEnvoyParamsSchema >['params']
 export type loginUserSchema = TypeOf<typeof loginUserSchema>["body"];
 

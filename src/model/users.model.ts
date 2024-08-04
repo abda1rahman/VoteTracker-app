@@ -72,6 +72,10 @@ const envoySchema = new mongoose.Schema({
   },
 });
 
+envoySchema.index({user_id: 1})
+envoySchema.index({box_id: 1})
+envoySchema.index({candidate_id: 1})
+
 // Developer Model
 const developerSchema = new mongoose.Schema({
   user_id: {
