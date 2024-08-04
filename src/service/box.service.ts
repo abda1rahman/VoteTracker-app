@@ -127,7 +127,7 @@ async function getAllBoxes(city_id: string){
 
 async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
   try {
-    const box:any = await BoxesModel.aggregate([
+    const pipeline = [
       { $match: { city_id: 1, boxName: boxName } },
       {
         $lookup: {
@@ -180,7 +180,8 @@ async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
           members: 1
         }
       },
-    ])
+    ]
+    const box:any = await BoxesModel.aggregate(pipeline)
 
     return box[0]
   } catch (error:any) {
@@ -291,7 +292,7 @@ async function getMembersDataVote(envoy_id: string) {
         }
       }
     ]
-    const members: IMembersInfo[] | IMembersInfo  = await EnvoyModel.aggregate(pipeline);
+    const members: IMembersInfo[] = await EnvoyModel.aggregate(pipeline);
 
     return members[0]
 

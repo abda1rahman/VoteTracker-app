@@ -1,7 +1,7 @@
 import log from "../utils/logger";
 import client from "../utils/redis";
 
-export async function setCache(key:string, value: any, ttl?: number):Promise<any>
+export async function setCache(key:string, value: any, ttl: number = 3600 * 4):Promise<any>
 {
   try {
     // await client.setEx(key, ttl, JSON.stringify(value))
