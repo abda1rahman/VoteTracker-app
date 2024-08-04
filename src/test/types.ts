@@ -1,6 +1,7 @@
 import { Document, ObjectId, Types } from "mongoose";
 import { CreateEnvoyInput } from "../schema/user.schema";
 import { EnvoyModelType } from "../model/users.model";
+import { AuthTypes } from "../service/types";
 
 export type IEnvoyData = {
 
@@ -30,3 +31,16 @@ export type IEnvoyUser = {
   user_id: string;
   token: string;
 } & Omit<CreateEnvoyInput, "password"> 
+
+export type IEnvoyWithBoxName = {
+    firstName: string;
+    lastName: string;
+    ssn: string;
+    phone: string;
+    city_id: number;
+    role: 'envoy',
+    id: string;
+    box_id: string;
+    candidate_id: string;
+    boxName: string;
+}

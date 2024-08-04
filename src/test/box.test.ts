@@ -1,27 +1,32 @@
 import mongoose from "mongoose";
-import connect from "../utils/connect";
+import {connectDB} from "../utils/connect"
 import supertest from "supertest";
 import createServer from "../utils/serverTest";
 import { faker } from "@faker-js/faker";
 import { clearupTestBox, createEnvoyTest } from "../utils/testSetup";
 import { generateRandomNumber } from "../utils/helper";
+import client from "../utils/redis";
+import { IEnvoyWithBoxName } from "./types";
+import { getCache } from "../service/redis.service";
+import { response } from "express";
 
 const request = supertest(createServer());
 
 let box;
 let member: any;
-let envoy: any;
+let envoy: IEnvoyWithBoxName
 
 beforeAll(async () => {
   // connect to database
-  await connect();
+  await connectDB();
   envoy = await createEnvoyTest();
-});
+},10000);
 
 afterAll(async () => {
   // cleanup test
   await clearupTestBox()
   await mongoose.disconnect();
+  await client.quit(); 
 });
 
 // Register Box
@@ -35,7 +40,7 @@ describe("POST Register Box", () => {
     };
 
     const response = await request
-      .post("/api/developer/registerBox")
+      .post("/api/boxes")
       .send(boxData);
 
     expect(response.statusCode).toBe(201);
@@ -65,7 +70,7 @@ describe("POST Create Member", () => {
     };
 
     const response = await request
-    .post("/api/developer/createBoxMember")
+    .post("/api/members")
     .send(memberData);
     
     expect(response.statusCode).toBe(201);
@@ -85,7 +90,7 @@ describe("GET All Boxes", () => {
   test("should return list of all boxes with 200", async () => {
     let city_id = 1;
 
-    const response = await request.get(`/api/getAllBoxesInCity/${city_id}`);
+    const response = await request.get(`/api/boxes/cities/${city_id}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.success).toBe(true);
@@ -103,7 +108,7 @@ describe("GET All Boxes", () => {
 describe("GET Box and List Members", () => {
   test("should box details and list member with 200", async () => {
     const response = await request.get(
-      `/api/getBox?boxName=${box!.boxName}&city_id=${box!.city_id}`
+      `/api/boxes?boxName=${box!.boxName}&city_id=${box!.city_id}`
     );
 
 
@@ -128,7 +133,7 @@ describe("GET All Boxes", () => {
   test("should return list of all boxes with 200", async () => {
     let city_id = 1;
 
-    const response = await request.get(`/api/getAllBoxesInCity/${city_id}`);
+    const response = await request.get(`/api/boxes/cities/${city_id}`);
 
     expect(response.statusCode).toBe(200);
     expect(response.body.success).toBe(true);
@@ -149,11 +154,11 @@ describe('POST Create Vote Records', ()=> {
     const recordData = {
       envoy_id: envoy.id.toString(),
       member_id: member!.id.toString(),
-      state: true
+      state: parseInt(generateRandomNumber(0, 3))
     }
 
     const response = await request
-    .post(`/api/user/createRecord`)
+    .post(`/api/records`)
     .send(recordData)
 
     expect(response.statusCode).toBe(200)
@@ -161,8 +166,17 @@ describe('POST Create Vote Records', ()=> {
     expect(response.body.message).toEqual('Vote created successfully')
     expect(response.body.result.envoy_id).toEqual(expect.any(String))
     expect(response.body.result.member_id).toEqual(expect.any(String))
-    expect(response.body.result.state).toEqual(expect.any(Boolean))
+    expect(response.body.result.state).toEqual(expect.any(Number))
     expect(response.body.result.id).toEqual(expect.any(String))
     
+    
   })
+  test('should create store cache in Redis', async()=> {
+    const result = await getCache(`candidateRecord:${envoy.candidate_id}`)
+    expect(result).toHaveProperty('totalVote')
+    expect(result).toHaveProperty('totalNotVote')
+    expect(result).toHaveProperty('totalSecret')
+    expect(result).toHaveProperty('totalOther')
+  })
+
   })

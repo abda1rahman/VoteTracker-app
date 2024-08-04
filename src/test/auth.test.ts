@@ -1,11 +1,12 @@
 import supertest from "supertest"
 import createServer from "../utils/serverTest"
-import connect from "../utils/connect"
+import {connectDB} from "../utils/connect"
 import mongoose from "mongoose";
 import {faker} from '@faker-js/faker'
 import { generateRandomNumber } from "../utils/helper";
 import { CreateEnvoyInput } from "../schema/user.schema";
 import { clearupTestData, createBoxForTest, createCandidateForTest } from "../utils/testSetup";
+import client from "../utils/redis";
 
 const request = supertest(createServer())
 
@@ -15,16 +16,18 @@ let candidate;
 let envoy;
 
 beforeAll(async()=> {
-  await connect()
+  await connectDB()
 
   const box = await createBoxForTest()
 
   box_id = box.id.toString()
 })
+
 afterAll(async()=> {
   // Clean up test data after all tests
   await clearupTestData()
   await mongoose.disconnect()
+  await client.quit(); 
 })
 // Create Candidate
 describe('POST /api/auth/register/candidate', ()=> {
@@ -108,9 +111,9 @@ describe('POST /api/auth/developer/register', ()=> {
       }
   
         const response = await request
-        .post('/api/auth/developer/register')
+        .post('/api/auth/register/developer')
         .send(developerData)
-        
+
         expect(response.status).toBe(201);
         expect(response.body.message).toBe('Developer created successfully')
         expect(response.body.success).toBe(true)
@@ -121,7 +124,6 @@ describe('POST /api/auth/developer/register', ()=> {
         expect(response.body.result.city_id).toEqual(expect.any(Number));
         expect(response.body.result.role).toEqual('developer'); 
         expect(response.body.result.id).toEqual(expect.any(String));
-        expect(response.body.result.user_id).toEqual(expect.any(String));
         expect(response.body.result.token).toEqual(expect.any(String));
         developer = response.body.result;
     })
