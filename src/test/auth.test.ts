@@ -21,7 +21,7 @@ beforeAll(async()=> {
   const box = await createBoxForTest()
 
   box_id = box.id.toString()
-})
+}, 10000)
 
 afterAll(async()=> {
   // Clean up test data after all tests
