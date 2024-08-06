@@ -10,10 +10,9 @@ export const generateToken = (
   res: Response
 ): string => {
 try {
-  const cookieName = role;
-
   // Ensure required environment variables are defined
   if (!process.env.ACCESS_TOKEN_SECRET || !process.env.ACCESS_TOKEN_TIME || !process.env.RERESH_TOKEN_TIME || !process.env.COOKIE_EXPIRE) {
+    log.error('Error enviroment variables in middleware => jwt ')
     throw new Error('Required environment variables are not defined.');
   }
 
@@ -29,7 +28,7 @@ process.env.ACCESS_TOKEN_SECRET,
 { expiresIn: process.env.RERESH_TOKEN_TIME}
 );
 
-res.cookie(cookieName, refreshToken, {
+res.cookie('jwt', refreshToken, {
 expires: new Date(Date.now() + parseInt(process.env.COOKIE_EXPIRE) ),
 });
 
