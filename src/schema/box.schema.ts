@@ -86,9 +86,23 @@ export const getBoxNameAndCityIdSchema = object({
   }),
 });
 
+export const getSearchMemberSchema = object({
+  query: object({
+    query: string({
+      required_error: "query is required",
+    }),
+    box_id: string({ required_error: "box_id should be string" }).refine(
+      (id) => isValidObjectId(id),
+      { message: "box_id must be valid id" }
+    ),
+  })
+})
+
 export type BoxesInput = TypeOf<typeof createBoxesSchema>["body"];
 export type MemberInput = TypeOf<typeof createMemberSchema>["body"];
 export type VoteRecordInput = TypeOf<typeof createVoteRecordSchema>["body"];
 
 export type BoxParamsInput = TypeOf<typeof getBoxesByCitySchema>["params"];
 export type BoxQueryInput = TypeOf<typeof getBoxNameAndCityIdSchema>["query"];
+export type SearchQueryInput = TypeOf<typeof getSearchMemberSchema>["query"];
+

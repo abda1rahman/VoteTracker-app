@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { MemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput } from "../schema/box.schema";
+import { MemberInput, BoxParamsInput, BoxQueryInput, BoxesInput, VoteRecordInput, SearchQueryInput } from "../schema/box.schema";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import logger from "../utils/logger";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
 import { createBox, createMember, getMembersDataVote, findBox, findMemberBySsn, getAllBoxes, getBoxByNameAndCity_id, searchQueryMember, updateVoteRecord, findRecordMember } from "../service/box.service";
 import { exportExcel } from "../utils/exportExcel";
-import { getCache, incrementByCache, setCache } from "../service/redis.service";
-import { IStateRecord } from "../model/box.model";
+import { IMemberType } from "../model/box.model";
 import { updateCacheRecord } from "../utils/cacheHelper";
+import { checkExistCacheMember, createIndexMember, searchHashMember, setCacheHashMember } from '../redis/MemberSearch'
 
 
 // Register Box
@@ -149,25 +149,48 @@ export const createVoteRecordHandler = async(req:Request<{},{},VoteRecordInput>,
   }
 }
 
-
 // Search Member
-export const getMemberSearchHandler = async(req:Request, res:Response) => {
+export const getMemberSearchHandler = async(req:Request<{},{},{},SearchQueryInput>, res:Response) => {
   try {
-    const query = req.query.query as string;
-
-    const response = await searchQueryMember(query)
-
-    if(response.length < 1 ){
-      return res.status(200).json(successResponse(200, 'no result found', null))
+    const {box_id, query} = req.query 
+    
+    // Validate query parameters
+    if(!query || !box_id) {
+      return res.status(400).json(errorResponse(400, "Both 'query' and 'box_id' must be provided",[]));
     }
 
-    return res.status(200).json(successResponse(200, 'result found', response))
+    // Check if members exist 
+    const isExistMembers = await checkExistCacheMember(box_id)
+    let resultSearch: any;
+
+    if(isExistMembers){
+      logger.warn('already exist cache member')
+        resultSearch =await searchHashMember(box_id, query)
+    }else {
+      logger.warn('not exist cache members')
+
+      // Retrieve and cache members if not in cache
+      const memberList:IMemberType[]  = await searchQueryMember(box_id)
+      // set data in cache 
+      await setCacheHashMember(`boxMembers:${box_id}:member:`, memberList, 3600 * 24 * 2) // set data for 2 days
+
+      // Create index after set cache
+      await createIndexMember(box_id)
+      resultSearch = await searchHashMember(box_id, query)
+    }
+
+    if(resultSearch.length < 1 ){
+      return res.status(404).json(successResponse(404, 'no result found', []))
+    }
+
+    return res.status(200).json(successResponse(200, 'result found', resultSearch))
   } catch (error:any) {
     logger.error('Error in controller getMemberSearchHandler', error.message)
     return res.status(500).json(errorResponse(500, "something went wrong"));
   }
 }
 
+// Export Member To Excel File
 export const exportMembersHandler = async(req:Request, res:Response) => {
   try {
     const {envoyId} = req.params

@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 import { BoxesInput, MemberInput } from "../schema/box.schema";
 // Type box
@@ -7,6 +7,7 @@ export interface BoxesType extends BoxesInput, Document {
 }
 // Type member
 export type IMemberType = {
+  _id: Types.ObjectId
   box_id: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;

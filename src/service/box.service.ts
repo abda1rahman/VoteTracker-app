@@ -1,5 +1,5 @@
 import { Types } from "mongoose"
-import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord } from "../model/box.model"
+import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord, IMemberType } from "../model/box.model"
 import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
@@ -205,17 +205,10 @@ try {
 }
 }
 
-async function searchQueryMember(search:string) {
+async function searchQueryMember(box_id:string) {
   try {
-    let searchResponse
-    if(Number.isFinite(Number(search))){
-      searchResponse = await MemberModel.find({identity: search});
-    } else {
-       searchResponse = await MemberModel.find({$text: {$search:`\"${search}\"` }})
-      .limit(6).sort({firstName: -1})
-    }    
-
-    return searchResponse;
+    const memberList: IMemberType[] = await MemberModel.find({box_id}).select('-__v')
+    return memberList
   } catch (error:any) {
     logger.error("Error in service searchQueryMember", error.message);
     throw new Error('Failed to perform search query');
