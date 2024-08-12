@@ -91,7 +91,7 @@ async function findMemberBySsn(ssn: string){
   }
 }
 
-async function createMember(firstName:string, lastName:string, ssn:string, boxName:string, box_id:string){
+async function createMember(firstName:string, lastName:string, ssn:string, boxName:string, box_id:string, identity:number){
   try {
     const member = await MemberModel.create({
       box_id,
@@ -99,6 +99,7 @@ async function createMember(firstName:string, lastName:string, ssn:string, boxNa
       firstName,
       lastName,
       ssn,
+      identity
     });
 
     return member

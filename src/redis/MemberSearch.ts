@@ -1,18 +1,11 @@
 import { Types } from "mongoose";
 import log from "../utils/logger";
 import client from './index'
-
-interface MemberData {
-  _id: Types.ObjectId;
-  box_id: Types.ObjectId;
-  firstName: string;
-  lastName: string;
-  ssn: string;
-}
+import { IMemberType } from "../model/box.model";
 
 export async function setCacheHashMember(
   key: string,
-  value: MemberData[],
+  value: IMemberType[],
   ttl?: number
 ) {
   try {
@@ -25,6 +18,7 @@ export async function setCacheHashMember(
           firstName: member.firstName,
           lastName: member.lastName,
           ssn: member.ssn,
+          identity: member.identity
         };
         const keyName = key + i;
         await client.hSet(keyName, memberObject);
@@ -67,13 +61,27 @@ export async function searchHashMember(
   offset = 0
 ) {
   try {
+    let searchQuery:string
+    // Remove white space 
+    query = query.trim()
+    
+    if(checkQueryType(query) === 'number'){
+      searchQuery = `@identity:[${query} ${query}]`
+    } else {
+      searchQuery = `@firstName:${query}*`
+    }
+
     const searchResult = await client.sendCommand([
       "FT.SEARCH",
       `boxMembers:${box_id}`,
-      `@firstName:${query}*`,
+      `${searchQuery}`,
       `LIMIT`,
       `${offset}`,
       `${limit}`,
+      'SORTBY',
+      'firstName',
+      'ASC'
+
     ]);
 
     const jsonResults = convertSearchResultsToJSON(searchResult as any);
@@ -98,6 +106,9 @@ export async function createIndexMember(box_id: string) {
       "firstName",
       "TEXT",
       "SORTABLE",
+      "identity",
+      "NUMERIC",
+      "SORTABLE"
     ]);
     log.info(`Create index ${box_id} => firstName `);
   } catch (error: any) {
@@ -105,7 +116,7 @@ export async function createIndexMember(box_id: string) {
   }
 }
 // Helper function to validate member data
-function isValidMemberData(data: any): data is MemberData {
+function isValidMemberData(data: any): data is IMemberType {
   return (
     typeof data.firstName === "string" &&
     typeof data.lastName === "string" &&
@@ -134,4 +145,11 @@ function convertSearchResultsToJSON(results: any) {
   }
 
   return jsonResults;
+}
+
+function checkQueryType(query:string | number) {
+  if(Number.isFinite(Number(query)))
+    return 'number'
+  else
+  return 'string'
 }

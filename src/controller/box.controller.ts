@@ -42,7 +42,7 @@ export const createMemberHandler = async (
   req: Request<{}, {}, MemberInput>,
   res: Response
 ) => {
-  const { boxName, firstName, lastName, ssn, city_id } = req.body;
+  const { boxName, firstName, lastName, ssn, city_id, identity } = req.body;
 
   try {
 
@@ -59,7 +59,7 @@ export const createMemberHandler = async (
 
     
     // Create box member
-    const Member = await createMember(firstName, lastName, ssn, boxName, box.id)
+    const Member = await createMember(firstName, lastName, ssn, boxName, box.id, identity)
 
     res.status(201).json(successResponse(201, "Box member created successfully", Member));
 

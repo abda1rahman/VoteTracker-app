@@ -12,6 +12,7 @@ export type IMemberType = {
   firstName: string;
   lastName: string;
   ssn: string;
+  identity: number;
 } & Document
 
 // Type enum vote-record
