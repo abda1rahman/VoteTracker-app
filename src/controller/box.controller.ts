@@ -8,6 +8,7 @@ import { exportExcel } from "../utils/exportExcel";
 import { IMemberType } from "../model/box.model";
 import { updateCacheRecord } from "../utils/cacheHelper";
 import { checkExistCacheMember, createIndexMember, searchHashMember, setCacheHashMember } from '../redis/MemberSearch'
+import { IMemberSearch } from "../service/types";
 
 
 // Register Box
@@ -42,7 +43,7 @@ export const createMemberHandler = async (
   req: Request<{}, {}, MemberInput>,
   res: Response
 ) => {
-  const { boxName, firstName, lastName, ssn, city_id, identity } = req.body;
+  const { boxName, firstName, secondName, thirdName, lastName, ssn, city_id, identity } = req.body;
 
   try {
 
@@ -59,7 +60,7 @@ export const createMemberHandler = async (
 
     
     // Create box member
-    const Member = await createMember(firstName, lastName, ssn, boxName, box.id, identity)
+    const Member = await createMember(firstName, secondName, thirdName, lastName, ssn, boxName, box.id, identity)
 
     res.status(201).json(successResponse(201, "Box member created successfully", Member));
 
@@ -161,7 +162,7 @@ export const getMemberSearchHandler = async(req:Request<{},{},{},SearchQueryInpu
 
     // Check if members exist 
     const isExistMembers = await checkExistCacheMember(box_id)
-    let resultSearch: any;
+    let resultSearch: any
 
     if(isExistMembers){
       logger.warn('already exist cache member')
@@ -170,7 +171,7 @@ export const getMemberSearchHandler = async(req:Request<{},{},{},SearchQueryInpu
       logger.warn('not exist cache members')
 
       // Retrieve and cache members if not in cache
-      const memberList:IMemberType[]  = await searchQueryMember(box_id)
+      const memberList:IMemberSearch[]  = await searchQueryMember(box_id)
       // set data in cache 
       await setCacheHashMember(`boxMembers:${box_id}:member:`, memberList, 3600 * 24 * 2) // set data for 2 days
 

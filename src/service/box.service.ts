@@ -1,9 +1,9 @@
 import { Types } from "mongoose"
-import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord, IMemberType } from "../model/box.model"
+import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord } from "../model/box.model"
 import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
-import { IcandidateResult, IMembersInfo } from "./types"
+import { IcandidateResult, IMemberSearch, IMembersInfo } from "./types"
 
 type Ibox = {
 id: string;
@@ -91,12 +91,14 @@ async function findMemberBySsn(ssn: string){
   }
 }
 
-async function createMember(firstName:string, lastName:string, ssn:string, boxName:string, box_id:string, identity:number){
+async function createMember(firstName:string,secondName:string, thirdName:string, lastName:string, ssn:string, boxName:string, box_id:string, identity:number){
   try {
     const member = await MemberModel.create({
       box_id,
       boxName,
       firstName,
+      secondName,
+      thirdName,
       lastName,
       ssn,
       identity
@@ -167,8 +169,11 @@ async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
                 id: "$$member._id",
                 box_id: "$$member.box_id",
                 firstName: "$$member.firstName",
+                secondName: "$$member.secondName",
+                thirdName: "$$member.thirdName",
                 lastName: "$$member.lastName",
-                ssn: "$$member.ssn"
+                ssn: "$$member.ssn",
+                identity: "$$member.identity"
               }
             }
           }
@@ -208,7 +213,44 @@ try {
 
 async function searchQueryMember(box_id:string) {
   try {
-    const memberList: IMemberType[] = await MemberModel.find({box_id}).select('-__v')
+    const pipeline = [
+      {
+        $match: {box_id: new Types.ObjectId(box_id)}
+      },
+      {
+        $lookup: {
+          from: 'vote_records',
+          localField: '_id',
+          foreignField: 'member_id',
+          as: 'records'
+        }
+      },
+      {
+        $addFields: {
+          state: {
+            $cond: {
+              if: {
+                $or: [
+                  { $eq: [{ $arrayElemAt: ["$records.state", 0] }, 0] },  // Check status of the first record
+                  { $eq: [{ $size: "$records" }, 0] }                   // Check if records array is empty
+                ]
+              },
+              then: 0,
+              else: 1
+            }
+          }
+        }
+      },
+      {
+        $set: {
+          id: {$toString: '$_id'}
+        }
+      },
+      {
+        $unset: ['records', 'box_id', 'ssn', '_id', '__v']
+      }
+    ]
+    const memberList: IMemberSearch[] = await MemberModel.aggregate(pipeline)
     return memberList
   } catch (error:any) {
     logger.error("Error in service searchQueryMember", error.message);

@@ -26,10 +26,12 @@ export const createMemberSchema = object({
       .max(12),
     boxName: string({ required_error: "boxName is required" }),
     firstName: string({ required_error: "First Name is required" }),
+    secondName: string({ required_error: "Second Name is required" }),
+    thirdName: string({ required_error: "Third Name is required" }),
     lastName: string({ required_error: "Last Name is required" }),
     identity: number({ required_error: "identity is required" }),
     ssn: string({
-      required_error: "ssn => Social security number is required.",
+      required_error: "SSN => Social security number is required.",
     }),
   }),
 });

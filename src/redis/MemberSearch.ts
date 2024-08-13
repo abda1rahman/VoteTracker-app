@@ -1,29 +1,30 @@
-import { Types } from "mongoose";
 import log from "../utils/logger";
-import client from './index'
+import client from "./index";
 import { IMemberType } from "../model/box.model";
+import { IMemberSearch } from "../service/types";
 
 export async function setCacheHashMember(
   key: string,
-  value: IMemberType[],
+  value: IMemberSearch[],
   ttl?: number
 ) {
   try {
     for (let i = 0; i < value.length; i++) {
       const member = value[i];
-      if (isValidMemberData(member)) {
+      if (Object.keys(member).length > 5) {
         const memberObject = {
-          id: member._id.toString(),
-          box_id: member.box_id.toString(),
+          id: member.id,
+          state: member.state,
           firstName: member.firstName,
+          secondName: member.secondName,
+          thirdName: member.thirdName,
           lastName: member.lastName,
-          ssn: member.ssn,
-          identity: member.identity
+          identity: member.identity,
         };
         const keyName = key + i;
         await client.hSet(keyName, memberObject);
-        if(ttl !== undefined){
-          await client.expire(keyName, ttl) // data expire after 1 day
+        if (ttl !== undefined) {
+          await client.expire(keyName, ttl); // data expire after 1 day
         }
       } else {
         log.error(`invaild member ${i} data`);
@@ -47,7 +48,9 @@ export async function checkExistCacheMember(box_id: string): Promise<boolean> {
     const [keys, listKeys]: any = getKeysNum;
     return listKeys.length > 0;
   } catch (error) {
-    log.error("Error in store data redis/MemberSearch => checkExistCacheMember");
+    log.error(
+      "Error in store data redis/MemberSearch => checkExistCacheMember"
+    );
 
     // Return false if an error occurs
     return false;
@@ -61,14 +64,14 @@ export async function searchHashMember(
   offset = 0
 ) {
   try {
-    let searchQuery:string
-    // Remove white space 
-    query = query.trim()
-    
-    if(checkQueryType(query) === 'number'){
-      searchQuery = `@identity:[${query} ${query}]`
+    let searchQuery: string;
+    // Remove white space
+    query = query.trim();
+
+    if (checkQueryType(query) === "number") {
+      searchQuery = `@identity:[${query} ${query}]`;
     } else {
-      searchQuery = `@firstName:${query}*`
+      searchQuery = `@firstName:${query}*`;
     }
 
     const searchResult = await client.sendCommand([
@@ -78,13 +81,12 @@ export async function searchHashMember(
       `LIMIT`,
       `${offset}`,
       `${limit}`,
-      'SORTBY',
-      'firstName',
-      'ASC'
-
+      "SORTBY",
+      "firstName",
+      "ASC",
     ]);
 
-    const jsonResults = convertSearchResultsToJSON(searchResult as any);
+    const jsonResults = convertSearchResultsToJSON(searchResult);
 
     return jsonResults;
   } catch (error) {
@@ -108,48 +110,52 @@ export async function createIndexMember(box_id: string) {
       "SORTABLE",
       "identity",
       "NUMERIC",
-      "SORTABLE"
+      "SORTABLE",
     ]);
     log.info(`Create index ${box_id} => firstName `);
   } catch (error: any) {
     log.error("Error in redis/MemberSearch => createIndexMember");
   }
 }
-// Helper function to validate member data
-function isValidMemberData(data: any): data is IMemberType {
-  return (
-    typeof data.firstName === "string" &&
-    typeof data.lastName === "string" &&
-    typeof data.ssn === "string"
-  );
-}
 
 function convertSearchResultsToJSON(results: any) {
   const [totalResults, ...entries] = results;
 
-  const jsonResults = [];
+  const jsonResults: { [key: string]: any }[] = [];
+
   for (let i = 0; i < entries.length; i += 2) {
     const key = entries[i];
     const values = entries[i + 1];
 
-    const item: { [key: string]: string } = {};
+    const item: { [key: string]: any } = {};
+    const nameFields = ['firstName', 'secondName', 'thirdName', 'lastName'];
+    const nameParts: string[] = [];
+
     for (let j = 0; j < values.length; j += 2) {
       const field = values[j];
       const value = values[j + 1];
-      item[field] = value;
+
+      if (field === 'state' || field === 'identity') {
+        item[field] = Number(value);
+      } else if (nameFields.includes(field)) {
+        nameParts.push(value || ''); // Use empty string if value is null or undefined
+      } else {
+        item[field] = value;
+      }
     }
 
-    jsonResults.push({
-      ...item,
-    });
+    // Combine name parts into fullName
+    if (nameParts.length > 0) {
+      item.fullName = nameParts.join(' ').trim(); // Trim to remove extra spaces
+    }
+
+    jsonResults.push(item);
   }
 
   return jsonResults;
 }
 
-function checkQueryType(query:string | number) {
-  if(Number.isFinite(Number(query)))
-    return 'number'
-  else
-  return 'string'
+function checkQueryType(query: string | number) {
+  if (Number.isFinite(Number(query))) return "number";
+  else return "string";
 }

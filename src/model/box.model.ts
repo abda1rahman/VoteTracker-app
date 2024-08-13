@@ -10,6 +10,8 @@ export type IMemberType = {
   _id: Types.ObjectId
   box_id: mongoose.Types.ObjectId;
   firstName: string;
+  secondName: string;
+  thirdName:string;
   lastName: string;
   ssn: string;
   identity: number;
@@ -49,6 +51,8 @@ const MemberSchema = new mongoose.Schema(
   {
     box_id: { type: mongoose.Schema.ObjectId, ref: "boxes", required: true },
     firstName: { type: String, default: "" },
+    secondName: { type: String, default: "" },
+    thirdName: { type: String, default: "" },
     lastName: { type: String, default: "" },
     ssn: { type: String, required: true },
     identity: { type: Number },

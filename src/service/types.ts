@@ -91,3 +91,13 @@ export type IcandidateResult = {
   totalNotVote : number;
 }
 
+export type IMemberSearch = {
+
+  firstName:string;
+  secondName:string;
+  thirdName:string;
+  lastName:string;
+  identity:number;
+  state: number;
+  id: string;
+}
