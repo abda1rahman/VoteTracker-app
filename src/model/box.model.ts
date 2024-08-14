@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 import { BoxesInput, MemberInput } from "../schema/box.schema";
 // Type box
@@ -7,10 +7,14 @@ export interface BoxesType extends BoxesInput, Document {
 }
 // Type member
 export type IMemberType = {
+  _id: Types.ObjectId
   box_id: mongoose.Types.ObjectId;
   firstName: string;
+  secondName: string;
+  thirdName:string;
   lastName: string;
   ssn: string;
+  identity: number;
 } & Document
 
 // Type enum vote-record
@@ -24,6 +28,11 @@ export interface VoteRecordType extends Document {
   updatedAt: Date;
   createdAt: Date;
 }
+
+export type IFinalVoteResult = {
+  candidate_id: mongoose.Types.ObjectId
+  totalVote: number;
+} & Document
 
 const BoxesSchema = new mongoose.Schema(
   {
@@ -47,6 +56,8 @@ const MemberSchema = new mongoose.Schema(
   {
     box_id: { type: mongoose.Schema.ObjectId, ref: "boxes", required: true },
     firstName: { type: String, default: "" },
+    secondName: { type: String, default: "" },
+    thirdName: { type: String, default: "" },
     lastName: { type: String, default: "" },
     ssn: { type: String, required: true },
     identity: { type: Number },
@@ -83,9 +94,16 @@ const voteRecordSchema = new mongoose.Schema(
   }
 );
 
+
 voteRecordSchema.index({envoy_id: 1})
 voteRecordSchema.index({member_id: 1})
 
+const FinalResultSchema = new Schema({
+  candidate_id: {type: Schema.Types.ObjectId, ref: "candidates"},
+  totalVote: {type: Number, default: 0},
+})
+
+export const FinalResultModel = mongoose.model<IFinalVoteResult>('final_result', FinalResultSchema)
 export const BoxesModel = mongoose.model<BoxesType>("boxes", BoxesSchema);
 export const MemberModel = mongoose.model<IMemberType>(
   "member",

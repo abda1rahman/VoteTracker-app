@@ -26,9 +26,12 @@ export const createMemberSchema = object({
       .max(12),
     boxName: string({ required_error: "boxName is required" }),
     firstName: string({ required_error: "First Name is required" }),
+    secondName: string({ required_error: "Second Name is required" }),
+    thirdName: string({ required_error: "Third Name is required" }),
     lastName: string({ required_error: "Last Name is required" }),
+    identity: number({ required_error: "identity is required" }),
     ssn: string({
-      required_error: "ssn => Social security number is required.",
+      required_error: "SSN => Social security number is required.",
     }),
   }),
 });
@@ -86,9 +89,23 @@ export const getBoxNameAndCityIdSchema = object({
   }),
 });
 
+export const getSearchMemberSchema = object({
+  query: object({
+    query: string({
+      required_error: "query is required",
+    }),
+    box_id: string({ required_error: "box_id should be string" }).refine(
+      (id) => isValidObjectId(id),
+      { message: "box_id must be valid id" }
+    ),
+  })
+})
+
 export type BoxesInput = TypeOf<typeof createBoxesSchema>["body"];
 export type MemberInput = TypeOf<typeof createMemberSchema>["body"];
 export type VoteRecordInput = TypeOf<typeof createVoteRecordSchema>["body"];
 
 export type BoxParamsInput = TypeOf<typeof getBoxesByCitySchema>["params"];
 export type BoxQueryInput = TypeOf<typeof getBoxNameAndCityIdSchema>["query"];
+export type SearchQueryInput = TypeOf<typeof getSearchMemberSchema>["query"];
+

@@ -12,9 +12,9 @@ export interface CandidteModelType extends Document {
   user_id: mongoose.Types.ObjectId ;
 }
 export interface EnvoyModelType extends Document {
-  user_id: mongoose.Types.ObjectId | CreateUserInput; // edit here
-  box_id: mongoose.Types.ObjectId;
-  candidate_id: mongoose.Types.ObjectId;
+  user_id: mongoose.Types.ObjectId | string | CreateUserInput; // edit here
+  box_id: mongoose.Types.ObjectId | string
+  candidate_id: mongoose.Types.ObjectId |string
 }
 export interface DeveloperModelType extends Document {
   user_id: mongoose.Types.ObjectId;

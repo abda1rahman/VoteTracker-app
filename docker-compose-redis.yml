@@ -8,14 +8,14 @@ services:
       - '6379:6379'
     volumes: 
       - redis_volume:/data
-  redis_insight:
-    image: redislabs/redisinsight:1.14.0
-    container_name: redis_insight
-    restart: always
-    ports:
-      - 8001:8001
-    volumes:
-      - redis_insight:/db
+  # redis_insight:
+  #   image: redislabs/redisinsight:1.14.0
+  #   container_name: redis_insight
+  #   restart: always
+  #   ports:
+  #     - 8001:8001
+  #   volumes:
+  #     - redis_insight:/db
 volumes:
   redis_volume:
-  redis_insight:
+  # redis_insight:

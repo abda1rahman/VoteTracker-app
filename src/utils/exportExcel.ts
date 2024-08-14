@@ -3,7 +3,6 @@ import { IMembersInfo } from '../service/types'
 import { Response } from 'express'
 import log from './logger'
 import { IStateRecord } from '../model/box.model'
-import { v4 as uuidv4 } from 'uuid'
 import fs from 'fs'
 import path from 'path'
 import { uploadExcelToCloudinary } from './upload'
@@ -19,6 +18,8 @@ try {
   sheet.columns = [
     {header: 'Id', key: 'id', width: 10, },
     {header: 'First Name', key: 'firstName', width: 25},
+    {header: 'Second Name', key: 'secondName', width: 25},
+    {header: 'third Name', key: 'thirdName', width: 25},
     {header: 'Last Name', key: 'lastName', width: 25},
     {header: 'SSN', key: 'ssn', width: 15},
     {header: 'State', key: 'ARState', width: 15},
@@ -42,7 +43,7 @@ try {
   const headerRow = sheet.getRow(2);
   sheet.getRow(2).font = { bold: true, color: {argb: 'ff000000'} }
   sheet.getRow(1).font = { bold: true, color: {argb: 'ffffffff'}, size: 14}
-  headerRow.values = ['رقم', 'الاسم الاول', 'الاسم الاخير', 'رقم الوطني', 'التصويت'];
+  headerRow.values = ['رقم', 'الاسم الاول', 'الاسم الثاني','الاسم الثالث', 'الاسم الاخير', 'رقم الوطني', 'التصويت'];
 
   // Apply fill to the header cells in row 2
   headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
@@ -54,9 +55,9 @@ try {
   });
   
   members.forEach((member, idx)=> {
-    let {firstName, lastName, state, ssn} = member
+    let {firstName,secondName, thirdName, lastName, state, ssn} = member
     const ARState  = getState(state)
-    sheet.addRow({id:idx + 1, firstName, lastName, ARState , ssn})
+    sheet.addRow({id:idx + 1, firstName, secondName, thirdName, lastName, ARState , ssn})
 })
 
     // Set all cells to left alignment

@@ -1,9 +1,9 @@
 import { Types } from "mongoose"
-import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord } from "../model/box.model"
+import { MemberModel, BoxesModel, VoteRecordModel, VoteRecordType, IStateRecord, FinalResultModel } from "../model/box.model"
 import { EnvoyModel } from "../model/users.model"
 import { BoxesInput } from "../schema/box.schema"
 import logger from "../utils/logger"
-import { IcandidateResult, IMembersInfo } from "./types"
+import { IcandidateResult, IMemberSearch, IMembersInfo } from "./types"
 
 type Ibox = {
 id: string;
@@ -91,14 +91,17 @@ async function findMemberBySsn(ssn: string){
   }
 }
 
-async function createMember(firstName:string, lastName:string, ssn:string, boxName:string, box_id:string){
+async function createMember(firstName:string,secondName:string, thirdName:string, lastName:string, ssn:string, boxName:string, box_id:string, identity:number){
   try {
     const member = await MemberModel.create({
       box_id,
       boxName,
       firstName,
+      secondName,
+      thirdName,
       lastName,
       ssn,
+      identity
     });
 
     return member
@@ -166,8 +169,11 @@ async function getBoxByNameAndCity_id(boxName:string, city_Id:number){
                 id: "$$member._id",
                 box_id: "$$member.box_id",
                 firstName: "$$member.firstName",
+                secondName: "$$member.secondName",
+                thirdName: "$$member.thirdName",
                 lastName: "$$member.lastName",
-                ssn: "$$member.ssn"
+                ssn: "$$member.ssn",
+                identity: "$$member.identity"
               }
             }
           }
@@ -205,17 +211,47 @@ try {
 }
 }
 
-async function searchQueryMember(search:string) {
+async function searchQueryMember(box_id:string) {
   try {
-    let searchResponse
-    if(Number.isFinite(Number(search))){
-      searchResponse = await MemberModel.find({identity: search});
-    } else {
-       searchResponse = await MemberModel.find({$text: {$search:`\"${search}\"` }})
-      .limit(6).sort({firstName: -1})
-    }    
-
-    return searchResponse;
+    const pipeline = [
+      {
+        $match: {box_id: new Types.ObjectId(box_id)}
+      },
+      {
+        $lookup: {
+          from: 'vote_records',
+          localField: '_id',
+          foreignField: 'member_id',
+          as: 'records'
+        }
+      },
+      {
+        $addFields: {
+          state: {
+            $cond: {
+              if: {
+                $or: [
+                  { $eq: [{ $arrayElemAt: ["$records.state", 0] }, 0] },  // Check status of the first record
+                  { $eq: [{ $size: "$records" }, 0] }                   // Check if records array is empty
+                ]
+              },
+              then: 0,
+              else: 1
+            }
+          }
+        }
+      },
+      {
+        $set: {
+          id: {$toString: '$_id'}
+        }
+      },
+      {
+        $unset: ['records', 'box_id', 'ssn', '_id', '__v']
+      }
+    ]
+    const memberList: IMemberSearch[] = await MemberModel.aggregate(pipeline)
+    return memberList
   } catch (error:any) {
     logger.error("Error in service searchQueryMember", error.message);
     throw new Error('Failed to perform search query');
@@ -264,7 +300,10 @@ async function getMembersDataVote(envoy_id: string) {
                 _id: 0,
                 box_id: 1,
                 firstName: 1,
+                secondName: 1,
+                thirdName: 1,
                 lastName: 1,
+                identity: 1,
                 ssn: 1,
                 state: {
                   $cond: {
@@ -302,157 +341,30 @@ async function getMembersDataVote(envoy_id: string) {
   }
 }
 
-async function getCandidateRecordResult(candidate_id: string):Promise<IcandidateResult>{
+// async function getCandidateRecordResult(candidate_id: string):Promise<IcandidateResult>{
+//   // try {
+
+
+//   //   return result
+//   // } catch (error:any) {
+//   //   logger.error('Error in service getCandidateRecordResult', error.message)
+//   //   throw new Error(error)
+//   // }
+// }
+
+async function updateFinalRecord(candidate_id:string, value:number){
   try {
-    const pipeline = [
-      {
-        $match: {
-          candidate_id: new Types.ObjectId(candidate_id)
-        }
-      },
-      {
-        $lookup: {
-          from: "boxes",
-          localField: "box_id",
-          foreignField: "_id",
-          as: "boxes"
-        }
-      },
-      {
-        $unwind: {
-          path: "$boxes",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $lookup: {
-          from: "members",
-          localField: "boxes._id",
-          foreignField: "box_id",
-          as: "members"
-        }
-      },
-      {
-        $unwind: {
-          path: "$members",
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalMembers: {
-            $addToSet: "$members._id"
-          },
-          // Collect unique member IDs
-          records: {
-            $push: {
-              member_id: "$members._id",
-              // Collect member IDs for later lookup
-              box_id: "$boxes._id"
-            }
-          }
-        }
-      },
-      {
-        $lookup: {
-          from: "vote_records",
-          let: {
-            member_ids: "$totalMembers"
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $in: ["$member_id", "$$member_ids"]
-                }
-              }
-            },
-            {
-              $group: {
-                _id: "$state",
-                count: {
-                  $sum: 1
-                }
-              }
-            }
-          ],
-          as: "state_counts"
-        }
-      },
-      {
-        $addFields: {
-          MembersCount: {
-            $size: "$totalMembers"
-          } // Count the unique members
-        }
-      },
-      {
-        $unwind: {
-          path: "$state_counts",
-          preserveNullAndEmptyArrays: true // Preserve if no state_counts
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          MembersCount: {
-            $first: "$MembersCount"
-          },
-          totalVote: {
-            $sum: {
-              $cond: [
-                {
-                  $eq: ["$state_counts._id", 1]
-                },
-                "$state_counts.count",
-                0
-              ]
-            }
-          },
-          totalSecret: {
-            $sum: {
-              $cond: [
-                {
-                  $eq: ["$state_counts._id", 2]
-                },
-                "$state_counts.count",
-                0
-              ]
-            }
-          },
-          totalOther: {
-            $sum: {
-              $cond: [
-                {
-                  $eq: ["$state_counts._id", 3]
-                },
-                "$state_counts.count",
-                0
-              ]
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-        totalNotVote : {
-          $subtract: [
-            '$MembersCount', {$add: ['$totalVote', '$totalOther', '$totalSecret']}
-          ]
-        }
-        }
-      },
-      {
-        $unset: '_id'
-      }
-    ]
-    
-    const result: IcandidateResult[] = await EnvoyModel.aggregate(pipeline)
-    return result[0] 
+    const filter = {candidate_id: new Types.ObjectId(candidate_id)};
+    const update = {$inc: {"totalVote": value}}
+    const options = {new: true, upsert: true, setDefaultsOnInsert: true}
+    const result = await FinalResultModel.findOneAndUpdate(filter,update,options)
+
+    const totalVote = result?.totalVote ?? 0
+
+    return totalVote
   } catch (error:any) {
-    logger.error('Error in service getCandidateRecordResult', error.message)
-    throw new Error(error)
+    logger.error("Error in service/box.service => updateFinalRecord", error.message);
+    throw new Error(error);
   }
 }
 
@@ -469,5 +381,5 @@ export {
   searchQueryMember,
   getMembersDataVote,
   findRecordMember,
-  getCandidateRecordResult
+  updateFinalRecord
 }
