@@ -19,6 +19,8 @@ services:
     volumes:
       - vote-app:/app
       - /app/node_modules
+    networks:
+      - my-network
     depends_on:
       - redis
 
@@ -30,6 +32,8 @@ services:
       - "6379:6379"
     volumes:
       - redis_volume:/data
+    networks:
+      - my-network
 
 volumes:
   vote-app:
