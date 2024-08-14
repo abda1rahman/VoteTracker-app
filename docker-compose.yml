@@ -19,25 +19,25 @@ services:
     volumes:
       - vote-app:/app
       - /app/node_modules
-    networks:
-      - my-network
-    depends_on:
-      - redis
+    # networks:
+    #   - my-network
+    # depends_on:
+    #   - redis
 
-  redis:
-    image: redis/redis-stack:latest
-    container_name: redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_volume:/data
-    networks:
-      - my-network
+  # redis:
+  #   image: redis/redis-stack:latest
+  #   container_name: redis
+  #   restart: always
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_volume:/data
+  #   networks:
+  #     - my-network
 
 volumes:
   vote-app:
-  redis_volume:
+  # redis_volume:
 
-networks:
-  my-network:
+# networks:
+#   my-network:
