@@ -21,8 +21,8 @@ services:
       - /app/node_modules
     # networks:
     #   - my-network
-    depends_on:
-      - redis
+    # depends_on:
+    #   - redis
 
   # redis:
   #   image: redis/redis-stack:latest
