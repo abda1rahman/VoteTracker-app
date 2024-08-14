@@ -26,9 +26,9 @@ app.use(router);
 // Serve static files from the 'client' directory
 app.use(express.static(join(__dirname, '../client/public')));
 
-app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, '../clinet/public', 'index.html'))
-});
+// app.get("/", (req, res) => {
+//   res.sendFile(join(__dirname, '../clinet/public', 'index.html'))
+// });
 
 server.listen(port, '0.0.0.0', () => {
   log.info(`Server is running at localhost ${process.env.port}`);
