@@ -4,7 +4,7 @@ import log from "../utils/logger";
 // for production use { url: "redis://localhost:6379" }
 const client = createClient({
   socket: {
-    host: "redis-server",
+    host: "127.0.0.1",
     port: 6379,
   },
 });
