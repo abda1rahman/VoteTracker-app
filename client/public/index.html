@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+		integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+	<link rel="stylesheet" href="style.css" />
+	<title>ChatCord App</title>
+</head>
+
+<body>
+	<form>
+		<div class="container">
+			<div class="circle-result">
+				<h3>total Vote</h3>
+				<p class="vote_result">0</p>
+			</div>
+			<div class="form-control">
+				<!-- <label for="enovy_id">Enter envoy id: </label>
+				<input class="input" type="text" placeholder="enovy_id" name="envoy_id" id="envoy_id"/> -->
+				<label for="enovy_id">Enter candidate id: </label>
+				<input class="input" type="text" placeholder="candidate_id" name="candidate_id" id="candidate_id"/>
+			</div>
+			<button class="button" type="submit">send</button>
+		</div>
+	</form>
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qs/6.9.2/qs.min.js"
+	integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4=" crossorigin="anonymous"></script>
+<script src="http://localhost:1337/socket.io/socket.io.js"></script>
+<script src="script.js"></script>
+
+</html>
