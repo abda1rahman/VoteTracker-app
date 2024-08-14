@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { getCache, incrementByCache, setCache } from '../redis/MemberRecords'
 import { IStateRecord } from "../model/box.model";
-import { getCandidateRecordResult } from "../service/box.service";
+import { updateFinalRecord } from "../service/box.service";
 
 export async function updateCacheRecord(
   envoy: any,
@@ -33,20 +33,18 @@ export async function updateCacheRecord(
       if (oldState === null) {
         await incrementByCache(cacheKey, `$.${newStateName}`, 1);
         await incrementByCache(cacheKey, `$.totalNotVote`, -1);
+        await updateResultDatabase(newState, oldState, envoy.candidate_id)
       } else {
         await incrementByCache(cacheKey, `$.${newStateName}`, 1);
         await incrementByCache(cacheKey, `$.${oldStateName}`, -1);
+        await updateResultDatabase(newState, oldState, envoy.candidate_id)
       }
     } else {
       // Fetch total record result from database if cache doesn't exist
-      const candidateRecord = await getCandidateRecordResult(
-        envoy.candidate_id
-      );
+      const candidateTotal = await updateResultDatabase(newState, oldState, envoy.candidate_id);
+
       await setCache(cacheKey, {
-        totalVote: candidateRecord.totalVote,
-        totalNotVote: candidateRecord.totalNotVote,
-        totalSecret: candidateRecord.totalSecret,
-        totalOther: candidateRecord.totalOther,
+        totalVote: candidateTotal
       });
     }
   } catch (error: any) {
@@ -68,4 +66,16 @@ function getStateKey(state: IStateRecord | null): string {
     default:
       return "";
   }
+}
+
+async function updateResultDatabase(newState:number, oldState:number | null, candidate_id:string){
+  let result = 0
+  if(oldState === IStateRecord.VOTE){
+    result = await updateFinalRecord(candidate_id.toString(), -1)
+  }
+
+  if(newState === IStateRecord.VOTE){
+    result = await updateFinalRecord(candidate_id.toString(), 1)
+  }
+  return result
 }

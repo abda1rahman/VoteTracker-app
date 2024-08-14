@@ -29,6 +29,11 @@ export interface VoteRecordType extends Document {
   createdAt: Date;
 }
 
+export type IFinalVoteResult = {
+  candidate_id: mongoose.Types.ObjectId
+  totalVote: number;
+} & Document
+
 const BoxesSchema = new mongoose.Schema(
   {
     city_id: { type: Number, ref: "City", required: true },
@@ -89,9 +94,16 @@ const voteRecordSchema = new mongoose.Schema(
   }
 );
 
+
 voteRecordSchema.index({envoy_id: 1})
 voteRecordSchema.index({member_id: 1})
 
+const FinalResultSchema = new Schema({
+  candidate_id: {type: Schema.Types.ObjectId, ref: "candidates"},
+  totalVote: {type: Number, default: 0},
+})
+
+export const FinalResultModel = mongoose.model<IFinalVoteResult>('final_result', FinalResultSchema)
 export const BoxesModel = mongoose.model<BoxesType>("boxes", BoxesSchema);
 export const MemberModel = mongoose.model<IMemberType>(
   "member",

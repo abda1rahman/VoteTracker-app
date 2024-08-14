@@ -66,9 +66,12 @@ others: number;
 export type Imember = {
   box_id: string
   firstName: string
+  secondName:string;
+  thirdName: string;
   lastName: string 
   ssn: string
   id: string
+  identity: string;
   state: 0 | 1 | 2 | 3 
 }
 

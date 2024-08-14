@@ -14,7 +14,6 @@ import {
   getCandidateParamsSchema,
   getEnvoyParamsSchema,
 } from "../schema/user.schema";
-import { getCandidateRecordResult } from "../service/box.service";
 import { authorizeJWT } from "../middleware/auth";
 import { JwtPayload } from "jsonwebtoken";
 const router = express.Router();
@@ -55,10 +54,5 @@ router.get('/api/envoys/voteInfo/:envoyId',
 router.get("/api/cities", getAllCityHandler);
 
 // Route for test 
-router.get('/api/test/:id',authorizeJWT(['candidate', 'envoy']) , async(req:Request & JwtPayload,res)=> {
-const result = await getCandidateRecordResult(req.params.id)
-// console.log(req?.user)
-res.status(200).json(result)
-})
 
 export default router;
