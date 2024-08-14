@@ -3,7 +3,7 @@ import log from "../utils/logger";
 
 // for production use { url: "redis://localhost:6379" }
 const client = createClient({
-  url: "redis://localhost:6379",
+  url: "redis://0.0.0.0:6379",
 });
 
 client.on("error", (err) => console.log("Redis Client Error", err));
