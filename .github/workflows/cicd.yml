@@ -33,15 +33,8 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
-      - name: Pull image from Docker Hub
-        run: docker pull abdalrahman1/votetracker-app:1.0
-
-      - name: List Repository Directory Contents
-        run: ls -l $GITHUB_WORKSPACE
-
       - name: Run Docker Container
-        run: |
-          docker-compose up -d
+        run: docker-compose up -d
         env:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           MONGO_URL_DEV: ${{ secrets.MONGO_URL_DEV }}
