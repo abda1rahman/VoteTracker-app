@@ -38,3 +38,6 @@ services:
 volumes:
   vote-app:
   redis_volume:
+
+networks:
+  my-network:
