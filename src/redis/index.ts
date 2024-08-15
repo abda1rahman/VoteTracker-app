@@ -4,6 +4,7 @@ import log from "../utils/logger";
 // for production use { url: "redis://localhost:6379" }
 const host = process.env.NODE_ENV === 'production' ? process.env.REDIS_HOST : 'localhost'
 const client = createClient({
+  password: '321321',
   socket: {
     host: '164.92.145.147',
     port: 6379,
