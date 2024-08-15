@@ -89,7 +89,6 @@ export async function searchHashMember(
 
 export async function createIndexMember(box_id: string) {
   try {
-    console.log(box_id)
     await client.sendCommand([
       "FT.CREATE",
       `boxMembers:${box_id}`,

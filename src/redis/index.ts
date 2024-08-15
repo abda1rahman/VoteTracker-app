@@ -6,8 +6,18 @@ const host =
   process.env.NODE_ENV === "production" ? process.env.REDIS_HOST : "localhost";
 const client = createClient({
   socket: {
-    host: "redis",
+    host: "164.92.145.147",
     port: 6379,
+    reconnectStrategy(retries, cause) {
+      if (retries > 10) {
+        console.log("Too many retries on REDIS. Connection Terminated");
+        return new Error("Too many retries.");
+    } else {
+        const wait = Math.min(10 * Math.pow(2, retries), 60000);
+        console.log("waiting", wait, "milliseconds");
+        return wait;
+    }
+    },
   },
 });
 

@@ -271,7 +271,7 @@ export const getMemberSearchHandler = async (
       const memberList: IMemberSearch[] = await searchQueryMember(box_id);
       // set data in cache
       await setCacheHashMember(
-        `boxMembers${box_id}:member:`,
+        `boxMembers:${box_id}:member:`,
         memberList,
         3600 * 24 * 2
       ); // set data for 2 days
