@@ -1,6 +1,5 @@
 import log from "../utils/logger";
 import client from "./index";
-import { IMemberType } from "../model/box.model";
 import { IMemberSearch } from "../service/types";
 
 export async function setCacheHashMember(
@@ -9,20 +8,14 @@ export async function setCacheHashMember(
   ttl?: number
 ) {
   try {
+    // List of required keys for validation
+
     for (let i = 0; i < value.length; i++) {
       const member = value[i];
-      if (Object.keys(member).length > 5) {
-        const memberObject = {
-          id: member.id,
-          state: member.state,
-          firstName: member.firstName,
-          secondName: member.secondName,
-          thirdName: member.thirdName,
-          lastName: member.lastName,
-          identity: member.identity,
-        };
+      if (hasRequiredKeys(member)) {
         const keyName = key + i;
-        await client.hSet(keyName, memberObject);
+        await client.hSet(keyName, member);
+        console.info(i)
         if (ttl !== undefined) {
           await client.expire(keyName, ttl); // data expire after 1 day
         }
@@ -96,6 +89,7 @@ export async function searchHashMember(
 
 export async function createIndexMember(box_id: string) {
   try {
+    console.log(box_id)
     await client.sendCommand([
       "FT.CREATE",
       `boxMembers:${box_id}`,
@@ -158,4 +152,9 @@ function convertSearchResultsToJSON(results: any) {
 function checkQueryType(query: string | number) {
   if (Number.isFinite(Number(query))) return "number";
   else return "string";
+}
+
+function hasRequiredKeys(member: IMemberSearch): boolean {
+  const requiredKeys: (keyof IMemberSearch)[] = ['id', 'state', 'firstName', 'lastName', 'identity'];
+  return requiredKeys.every(key => member.hasOwnProperty(key));
 }

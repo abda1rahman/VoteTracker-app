@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 services:
   vote-project:
     image: abdalrahman1/votetracker-app:1.0
@@ -21,7 +21,7 @@ services:
       - vote-app:/app
       - /app/node_modules
     networks:
-      - my-network
+      - app-network
     depends_on:
       - redis
 
@@ -33,13 +33,13 @@ services:
       - "6379:6379"
     volumes:
       - redis_volume:/data
-    command: redis-server --bind 0.0.0.0 --requirepass 321321
     networks:
-      - my-network
+      - app-network
 
 volumes:
   vote-app:
   redis_volume:
 
 networks:
-  my-network:
+  app-network:
+    driver: bridge
