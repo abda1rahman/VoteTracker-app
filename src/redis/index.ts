@@ -5,7 +5,7 @@ import log from "../utils/logger";
 const host = process.env.NODE_ENV === 'production' ? process.env.REDIS_HOST : 'localhost'
 const client = createClient({
   socket: {
-    host,
+    host: '164.92.145.147',
     port: 6379,
   },
 });
