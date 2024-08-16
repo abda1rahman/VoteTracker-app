@@ -23,8 +23,6 @@ import {
   findRecordMember,
 } from "../service/box.service";
 import { exportExcel } from "../utils/exportExcel";
-import { IMemberType } from "../model/box.model";
-import { updateCacheRecord } from "../utils/cacheHelper";
 import {
   checkExistCacheMember,
   createIndexMember,
@@ -32,6 +30,7 @@ import {
   setCacheHashMember,
 } from "../redis/MemberSearch";
 import { IMemberSearch } from "../service/types";
+import { updateCacheRecord } from "../redis/trackRecods";
 
 // Register Box
 export const registerBoxHandler = async (
@@ -59,14 +58,12 @@ export const registerBoxHandler = async (
     // Create box
     const box = await createBox({ log, lat, boxName, city_id });
 
-    res
-      .status(201)
-      .json(
-        successResponse(201, "Box created successfully", {
-          ...box,
-          city: cityJordan!.city,
-        })
-      );
+    res.status(201).json(
+      successResponse(201, "Box created successfully", {
+        ...box,
+        city: cityJordan!.city,
+      })
+    );
   } catch (error: any) {
     logger.error("Error in controller registerBoxHandler", error.message);
     return res
@@ -275,9 +272,10 @@ export const getMemberSearchHandler = async (
         memberList,
         3600 * 24 * 2
       ); // set data for 2 days
-      console.log("pass setCacheHashMember");
+
       // Create index after set cache
       await createIndexMember(box_id);
+
       resultSearch = await searchHashMember(box_id, query);
     }
 
@@ -303,14 +301,12 @@ export const exportMembersHandler = async (req: Request, res: Response) => {
 
     const { url, fileName } = await exportExcel(membersInfo, envoyId, res);
 
-    return res
-      .status(200)
-      .json(
-        successResponse(200, "create file excel successfully", {
-          url,
-          fileName,
-        })
-      );
+    return res.status(200).json(
+      successResponse(200, "create file excel successfully", {
+        url,
+        fileName,
+      })
+    );
   } catch (error: any) {
     logger.error("Error in controller exportMembersHandler", error.message);
     return res

@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -23,18 +24,27 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
-      - name: Build Docker Image
-        run: docker-compose build --no-cache
-
-      - name: Publish Image to Docker Hub
-        run: docker push abdalrahman1/votetracker-app:1.0
+      # - name: Build Docker Image
+      #   run: |
+      #     docker-compose down -v
+      #     docker-compose build --no-cache
 
   deploy:
     needs: build
     runs-on: self-hosted
     steps:
+      - name: Remove old container and images 
+        run: |
+          docker-compose down vote-project -v
+          docker system prune -a --volumes -f 
+
       - name: Run Docker Container
-        run: docker-compose up -d
+        run: |
+          docker-compose up --build 
+
+      - name: Run container
+        run: docker-compose up --build -d
+
         env:
           NODE_ENV: ${{ secrets.NODE_ENV }}
           MONGO_URL_DEV: ${{ secrets.MONGO_URL_DEV }}

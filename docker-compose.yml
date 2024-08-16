@@ -1,7 +1,6 @@
 version: "3.8"
 services:
   vote-project:
-    image: abdalrahman1/votetracker-app:1.0
     container_name: vote-tracker-app
     build: .
     ports:

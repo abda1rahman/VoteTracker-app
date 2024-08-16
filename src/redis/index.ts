@@ -2,11 +2,10 @@ import { createClient } from "redis";
 import log from "../utils/logger";
 
 // for production use { url: "redis://localhost:6379" }
-const host =
-  process.env.NODE_ENV === "production" ? process.env.REDIS_HOST : "localhost";
+const HOST = process.env.NODE_ENV === "production" ? 'redis' : 'localhost';
 const client = createClient({
   socket: {
-    host: "164.92.145.147",
+    host: HOST,
     port: 6379,
     reconnectStrategy(retries, cause) {
       if (retries > 10) {
@@ -20,6 +19,7 @@ const client = createClient({
     },
   },
 });
+console.log('pass test 9999')
 
 client.on("error", (err) => console.log("Redis Client Error", err));
 

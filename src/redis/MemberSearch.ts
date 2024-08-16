@@ -15,7 +15,7 @@ export async function setCacheHashMember(
       if (hasRequiredKeys(member)) {
         const keyName = key + i;
         await client.hSet(keyName, member);
-        console.info(i)
+
         if (ttl !== undefined) {
           await client.expire(keyName, ttl); // data expire after 1 day
         }

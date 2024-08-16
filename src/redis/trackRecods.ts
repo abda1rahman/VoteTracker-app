@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { getCache, incrementByCache, setCache } from '../redis/MemberRecords'
+import { getCache, incrementByCache, setCache } from "./MemberRecords";
 import { IStateRecord } from "../model/box.model";
 import { updateFinalRecord } from "../service/box.service";
 
@@ -33,18 +33,22 @@ export async function updateCacheRecord(
       if (oldState === null) {
         await incrementByCache(cacheKey, `$.${newStateName}`, 1);
         await incrementByCache(cacheKey, `$.totalNotVote`, -1);
-        await updateResultDatabase(newState, oldState, envoy.candidate_id)
+        await updateResultDatabase(newState, oldState, envoy.candidate_id);
       } else {
         await incrementByCache(cacheKey, `$.${newStateName}`, 1);
         await incrementByCache(cacheKey, `$.${oldStateName}`, -1);
-        await updateResultDatabase(newState, oldState, envoy.candidate_id)
+        await updateResultDatabase(newState, oldState, envoy.candidate_id);
       }
     } else {
       // Fetch total record result from database if cache doesn't exist
-      const candidateTotal = await updateResultDatabase(newState, oldState, envoy.candidate_id);
+      const candidateTotal = await updateResultDatabase(
+        newState,
+        oldState,
+        envoy.candidate_id
+      );
 
       await setCache(cacheKey, {
-        totalVote: candidateTotal
+        totalVote: candidateTotal,
       });
     }
   } catch (error: any) {
@@ -68,14 +72,18 @@ function getStateKey(state: IStateRecord | null): string {
   }
 }
 
-async function updateResultDatabase(newState:number, oldState:number | null, candidate_id:string){
-  let result = 0
-  if(oldState === IStateRecord.VOTE){
-    result = await updateFinalRecord(candidate_id.toString(), -1)
+async function updateResultDatabase(
+  newState: number,
+  oldState: number | null,
+  candidate_id: string
+) {
+  let result = 0;
+  if (oldState === IStateRecord.VOTE) {
+    result = await updateFinalRecord(candidate_id.toString(), -1);
   }
 
-  if(newState === IStateRecord.VOTE){
-    result = await updateFinalRecord(candidate_id.toString(), 1)
+  if (newState === IStateRecord.VOTE) {
+    result = await updateFinalRecord(candidate_id.toString(), 1);
   }
-  return result
+  return result;
 }
