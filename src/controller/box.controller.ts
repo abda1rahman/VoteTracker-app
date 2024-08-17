@@ -275,7 +275,7 @@ export const getMemberSearchHandler = async (
 
       // Create index after set cache
       await createIndexMember(box_id);
-
+      await delay(500)
       resultSearch = await searchHashMember(box_id, query);
     }
 
@@ -314,3 +314,8 @@ export const exportMembersHandler = async (req: Request, res: Response) => {
       .json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
+
+// Utility function to create a delay
+function delay(ms:number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -19,7 +19,6 @@ const client = createClient({
     },
   },
 });
-console.log('pass test 9999')
 
 client.on("error", (err) => console.log("Redis Client Error", err));
 
