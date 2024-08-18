@@ -11,8 +11,8 @@ import { join } from "path";
 
 
 dotenv.config();
-const port = parseInt(process.env.PORT || "3000");
-const host = process.env.HOST || "localhost";
+const port = process.env.NODE_ENV === 'production' ? 80 : 3000
+const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost' 
 
 const app = express()
 
@@ -33,8 +33,8 @@ app.use(express.static(join(__dirname, '../client/public')));
 //   res.sendFile(join(__dirname, '../clinet/public', 'index.html'))
 // });
 
-app.listen(port, '0.0.0.0', () => {
-  log.info(`Server is running at localhost ${process.env.port}`);
+app.listen(port, host, () => {
+  log.info(`Server is running at localhost:${host} port: ${port}`);
 
   connectDB();
 });
