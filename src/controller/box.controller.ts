@@ -31,6 +31,7 @@ import {
 } from "../redis/MemberSearch";
 import { IMemberSearch } from "../service/types";
 import { updateCacheRecord } from "../redis/trackRecods";
+import { emitWebSocketEvent, io, socketCandidtes } from "../utils/webSocket";
 
 // Register Box
 export const registerBoxHandler = async (
@@ -221,14 +222,18 @@ export const createVoteRecordHandler = async (
     // Check if vote record already exists update if not created
     const VoteRecord = await updateVoteRecord(envoy_id, member_id, state);
 
-    const isCreated =
-      VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime();
+    const isCreated = VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime();
     const message = isCreated
       ? "Vote created successfully"
       : "Vote updated successfully";
 
     // Update cache records
-    await updateCacheRecord(envoy, state, oldState);
+    const finalResult = await updateCacheRecord(envoy, state, oldState);
+
+    // Event web socket 
+    if(finalResult) {
+      emitWebSocketEvent(envoy.candidate_id.toString(), finalResult)
+    }
 
     return res.status(200).json(successResponse(200, message, VoteRecord));
   } catch (error: any) {

@@ -47,10 +47,15 @@ export async function updateCacheRecord(
         envoy.candidate_id
       );
 
+
       await setCache(cacheKey, {
         totalVote: candidateTotal,
       });
     }
+    
+    // return cache data after update or set 
+    const dataTotalVote = await getCache(cacheKey);
+    return dataTotalVote;
   } catch (error: any) {
     console.error("error in cacheHelper => updateCacheRecord", error.message);
     throw new Error(error);
@@ -85,5 +90,7 @@ async function updateResultDatabase(
   if (newState === IStateRecord.VOTE) {
     result = await updateFinalRecord(candidate_id.toString(), 1);
   }
+
+  result  = await updateFinalRecord(candidate_id.toString(), 0)
   return result;
 }
