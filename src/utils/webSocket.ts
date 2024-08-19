@@ -2,6 +2,7 @@
 import { Server } from "socket.io";
 import express from "express";
 import http from "http";
+import { getFinalResultCandidate } from "../redis/trackRecods";
 
 const app = express();
 
@@ -30,14 +31,15 @@ io.on("connection", (socket) => {
   console.log('Connection successful ✅');
 
   // Handle new socketCandidtes
-  socket.on('new_candidate', (id) => {
+  socket.on('new_candidate', async(id) => {
     if (!allCandidate.has(socket.id) && socket.id && id.length > 10) {
       socketCandidtes.push({ candidate_id: id, socketId: socket.id });
       allCandidate.add(socket.id);
     }
-    console.log('socketCandidtes', socketCandidtes)
 
-
+    // Get final result for candidate
+    const finalResult  = await getFinalResultCandidate(id)
+    socket.emit('get_result', {totalVote: finalResult})
 
   });
   // run when user disconnect

@@ -81,16 +81,28 @@ async function updateResultDatabase(
   newState: number,
   oldState: number | null,
   candidate_id: string
-) {
-  let result = 0;
+): Promise<number> {
+  let delta = 0;
+
   if (oldState === IStateRecord.VOTE) {
-    result = await updateFinalRecord(candidate_id.toString(), -1);
+    delta -= 1;
   }
 
   if (newState === IStateRecord.VOTE) {
-    result = await updateFinalRecord(candidate_id.toString(), 1);
+    delta += 1;
   }
 
-  result  = await updateFinalRecord(candidate_id.toString(), 0)
-  return result;
+  return await updateFinalRecord(candidate_id.toString(), delta);
+}
+
+// Get total result for web socket
+export async function getFinalResultCandidate(candidate_id: string):Promise<number>{
+  try {
+    // to get current total vote
+     const finalResult = await updateFinalRecord(candidate_id, 0)
+    return finalResult ?? 0
+  } catch (error:any) {
+    console.error("error in redis/trackRecords => getTotalResultCandidate", error.message);
+    throw new Error(error);
+  }
 }
