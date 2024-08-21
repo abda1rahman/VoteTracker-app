@@ -8,7 +8,7 @@ import {
   SearchQueryInput,
 } from "../schema/box.schema";
 import { errorResponse, successResponse } from "../utils/apiResponse";
-import logger from "../utils/logger";
+import logger from "../utils/logger/index";
 import { findCity, findEnvoyAndMember } from "../service/user.service";
 import {
   createBox,
@@ -222,7 +222,8 @@ export const createVoteRecordHandler = async (
     // Check if vote record already exists update if not created
     const VoteRecord = await updateVoteRecord(envoy_id, member_id, state);
 
-    const isCreated = VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime();
+    const isCreated =
+      VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime();
     const message = isCreated
       ? "Vote created successfully"
       : "Vote updated successfully";
@@ -230,9 +231,9 @@ export const createVoteRecordHandler = async (
     // Update cache records
     const finalResult = await updateCacheRecord(envoy, state, oldState);
 
-    // Event web socket 
-    if(finalResult) {
-      emitWebSocketEvent(envoy.candidate_id.toString(), finalResult)
+    // Event web socket
+    if (finalResult) {
+      emitWebSocketEvent(envoy.candidate_id.toString(), finalResult);
     }
 
     return res.status(200).json(successResponse(200, message, VoteRecord));
@@ -280,7 +281,7 @@ export const getMemberSearchHandler = async (
 
       // Create index after set cache
       await createIndexMember(box_id);
-      await delay(500)
+      await delay(500);
       resultSearch = await searchHashMember(box_id, query);
     }
 
@@ -321,6 +322,6 @@ export const exportMembersHandler = async (req: Request, res: Response) => {
 };
 
 // Utility function to create a delay
-function delay(ms:number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

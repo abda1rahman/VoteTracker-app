@@ -1,6 +1,6 @@
 import { SchemaFieldTypes } from "redis";
 import client from "./index";
-import log from "../utils/logger";
+import log from "../utils/logger/index";
 
 export async function setCache(
   key: string,

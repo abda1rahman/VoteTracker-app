@@ -6,12 +6,20 @@ import {
   CreateUserInput,
   loginUserSchema,
 } from "../schema/user.schema";
-import log from "../utils/logger";
+import log from "../utils/logger/index";
 import { generateToken } from "../middleware/jwt";
 import { comparePassword } from "../middleware/comparePassword";
-import { findCandidateById, findUserBySsn, getUserByIdAndRole } from "../service/user.service";
+import {
+  findCandidateById,
+  findUserBySsn,
+  getUserByIdAndRole,
+} from "../service/user.service";
 import { errorResponse, successResponse } from "../utils/apiResponse";
-import { createCandidate, createDeveloper, createEnvoy } from "../service/auth.service";
+import {
+  createCandidate,
+  createDeveloper,
+  createEnvoy,
+} from "../service/auth.service";
 import { findBoxByCandidateAndId, findBoxById } from "../service/box.service";
 
 // Resigter Candidate
@@ -21,12 +29,14 @@ export const registerCandidateHandler = async (
 ) => {
   let { firstName, lastName, city_id, password, phone, ssn } = req.body;
   password = `${ssn}@12`;
-  
+
   try {
     // Check user
     const checkUser = await findUserBySsn(ssn)
     if (checkUser) {
-      return res.status(400).json(errorResponse(res.statusCode, "User or SSN already exists"));
+      return res
+        .status(400)
+        .json(errorResponse(res.statusCode, "User or SSN already exists"));
     }
 
     const candidate = await createCandidate({
@@ -44,10 +54,17 @@ export const registerCandidateHandler = async (
       res
     );
     // Format Response
-    const userJson = {...candidate, token};
+    const userJson = { ...candidate, token };
 
-    res.status(201)
-      .json(successResponse(res.statusCode,"Candidate successfully registered", userJson));
+    res
+      .status(201)
+      .json(
+        successResponse(
+          res.statusCode,
+          "Candidate successfully registered",
+          userJson
+        )
+      );
   } catch (error: any) {
     log.error('Error in controller registerCandidateHandler', error.message)
     return res
@@ -144,7 +161,7 @@ export const registerDeveloperHandler = async (
     }
 
     const developer = await createDeveloper({firstName, lastName, ssn, phone, password, city_id})
-    
+
     // Create token
     const token = generateToken(developer.id, "developer", res);
 
@@ -168,14 +185,18 @@ export const loginUserHandler = async (
 ) => {
   const { ssn, password } = req.body;
   try {
-    const user = await findUserBySsn(ssn)
+    const user = await findUserBySsn(ssn);
 
     if (!user) {
-      return res.status(401).json(errorResponse(res.statusCode, "Invalid ssn or password"));
+      return res
+        .status(401)
+        .json(errorResponse(res.statusCode, "Invalid ssn or password"));
     }
     const match = await comparePassword(password, user?.password ?? "");
     if (!match) {
-      return res.status(401).json(errorResponse(res.statusCode, "Invalid ssn or password"));
+      return res
+        .status(401)
+        .json(errorResponse(res.statusCode, "Invalid ssn or password"));
     }
 
     const token = generateToken(user!.id, user!.role, res);
@@ -196,8 +217,8 @@ export const loginUserHandler = async (
           mergedUserInfo
         )
       );
-  } catch (error:any) {
-    log.error('Error in controller loginUserHandler', error.message)
+  } catch (error: any) {
+    log.error("Error in controller loginUserHandler", error.message);
     return res
       .status(500)
       .json(errorResponse(res.statusCode, "Internal server error", error));

@@ -1,4 +1,4 @@
-import log from "../utils/logger";
+import log from "../utils/logger/index";
 import client from "./index";
 import { IMemberSearch } from "../service/types";
 
@@ -121,17 +121,17 @@ function convertSearchResultsToJSON(results: any) {
     const values = entries[i + 1];
 
     const item: { [key: string]: any } = {};
-    const nameFields = ['firstName', 'secondName', 'thirdName', 'lastName'];
+    const nameFields = ["firstName", "secondName", "thirdName", "lastName"];
     const nameParts: string[] = [];
 
     for (let j = 0; j < values.length; j += 2) {
       const field = values[j];
       const value = values[j + 1];
 
-      if (field === 'state' || field === 'identity') {
+      if (field === "state" || field === "identity") {
         item[field] = Number(value);
       } else if (nameFields.includes(field)) {
-        nameParts.push(value || ''); // Use empty string if value is null or undefined
+        nameParts.push(value || ""); // Use empty string if value is null or undefined
       } else {
         item[field] = value;
       }
@@ -139,7 +139,7 @@ function convertSearchResultsToJSON(results: any) {
 
     // Combine name parts into fullName
     if (nameParts.length > 0) {
-      item.fullName = nameParts.join(' ').trim(); // Trim to remove extra spaces
+      item.fullName = nameParts.join(" ").trim(); // Trim to remove extra spaces
     }
 
     jsonResults.push(item);
@@ -154,6 +154,12 @@ function checkQueryType(query: string | number) {
 }
 
 function hasRequiredKeys(member: IMemberSearch): boolean {
-  const requiredKeys: (keyof IMemberSearch)[] = ['id', 'state', 'firstName', 'lastName', 'identity'];
-  return requiredKeys.every(key => member.hasOwnProperty(key));
+  const requiredKeys: (keyof IMemberSearch)[] = [
+    "id",
+    "state",
+    "firstName",
+    "lastName",
+    "identity",
+  ];
+  return requiredKeys.every((key) => member.hasOwnProperty(key));
 }

@@ -2,12 +2,12 @@ import express from "express";
 import cors from "cors";
 import cookieParaser from "cookie-parser";
 
-import log from "./utils/logger";
 import { connectDB } from "./utils/connect";
 import router from "./routes/index.router";
 import dotenv from "dotenv";
 import { app, server } from "./utils/webSocket"; // diable web socket
 import { join } from "path";
+import log, { morganLogger } from "./utils/logger";
 
 dotenv.config();
 const port = process.env.NODE_ENV === "production" ? 80 : 1337;
@@ -20,7 +20,11 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(morganLogger())
+
 app.use(cookieParaser());
+
 app.use(router);
 
 // Serve static files from the 'client' directory
