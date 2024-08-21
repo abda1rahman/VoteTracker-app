@@ -108,7 +108,8 @@
   },
   "include": ["src/**/*.ts"],
     "exclude": [
-      "e:/Practics/voice-application/config/default.example.ts"
-    ]
+      "node_modules"
+    ],
+
   
 }

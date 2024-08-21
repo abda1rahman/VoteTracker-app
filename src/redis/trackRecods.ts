@@ -96,13 +96,15 @@ async function updateResultDatabase(
 }
 
 // Get total result for web socket
-export async function getFinalResultCandidate(candidate_id: string):Promise<number>{
+export async function getFinalResultCandidate(candidate_id: string): Promise<number> {
   try {
-    // to get current total vote
-     const finalResult = await updateFinalRecord(candidate_id, 0)
-    return finalResult ?? 0
-  } catch (error:any) {
-    console.error("error in redis/trackRecords => getTotalResultCandidate", error.message);
-    throw new Error(error);
+    // Get current total vote
+    const finalResult = await updateFinalRecord(candidate_id, 0);
+
+    return typeof finalResult === 'number' ? finalResult : 0;
+  } catch (error: any) {
+    console.error("Error in redis/trackRecords => getFinalResultCandidate:", error.message);
+    // Return a default value in case of an error
+    return 0;
   }
 }
