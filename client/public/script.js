@@ -36,7 +36,7 @@ form.addEventListener("submit", (e) => {
 socket.on("get_result", (data) => {
   console.log("get_result:", data); // Log data for debugging
 
-  if (data && data !== undefined) {
+  if (data !== undefined) {
     vote_result.textContent = data; // Update the HTML element with the new data
   }
 });

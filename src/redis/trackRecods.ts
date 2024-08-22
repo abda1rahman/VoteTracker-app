@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { getJsonCache, setHashCache, incrementJsonCache, setJsonCache } from "./MemberRecords";
+import { setHashCache } from "./MemberRecords";
 import { IMemberType, IStateRecord } from "../model/box.model";
 import { searchQueryMember, updateFinalRecord } from "../service/box.service";
 import log from "../utils/logger";
@@ -11,85 +11,23 @@ export async function updateCacheRecord(
   newState: IStateRecord,
   oldState: IStateRecord | null,
   member: IMemberType
-) {
-  const getCacheKey = (candidateId: Types.ObjectId) =>
-    `candidateRecord:${candidateId.toString()}`;
-
-  const cacheKey = getCacheKey(envoy.candidate_id);
-
+):Promise<number | undefined> {
   try {
     // Early return if no change in state or voting record has not changed
-    if (
-      oldState === newState ||
-      (oldState === null && newState == IStateRecord.NOT_VOTE)
-    ) {
-      return;
+    if (oldState === newState) {
+      return ;
     }
 
-    // Get cache data from redis
-    const cacheData = await getJsonCache(cacheKey);
+    // Update total candidate record in cahce and database
+       const totalVote = await updateResultDatabase(newState, oldState, envoy.candidate_id);
 
-    const newStateName = getStateKey(newState);
-    const oldStateName = getStateKey(oldState);
+    // Update Member state in cache 
+       await updateCacheMemberState(newState, member, envoy.box_id)
 
-    // Update exist cache
-    if (cacheData) {
-        // Update member in cache state
-        await updateCacheMemberState(newState, member, envoy.box_id)
-
-        // Update total candidate record in cahce and database
-        await updateTotalCandidateRecord(cacheKey, newState, oldState, newStateName, oldStateName, envoy.candidate_id)
-    } else {
-      // Update member in cache state
-      await updateCacheMemberState(newState, member, envoy.box_id)
-
-      // Fetch total record result from database if cache doesn't exist
-      const candidateTotal = await updateResultDatabase(
-        newState,
-        oldState,
-        envoy.candidate_id
-      );
-
-
-      await setJsonCache(cacheKey, {
-        totalVote: candidateTotal,
-      });
-    }
-    
-    // return cache data after update or set 
-    const dataTotalVote = await getJsonCache(cacheKey);
-    return dataTotalVote;
+    return totalVote;
   } catch (error: any) {
     console.error("error in cacheHelper => updateCacheRecord", error.message);
     throw new Error(error);
-  }
-}
-
-function getStateKey(state: IStateRecord | null): string {
-  switch (state) {
-    case IStateRecord.VOTE:
-      return "totalVote";
-    case IStateRecord.NOT_VOTE:
-      return "totalNotVote";
-    case IStateRecord.SECRET:
-      return "totalSecret";
-    case IStateRecord.OTHERS:
-      return "totalOther";
-    default:
-      return "";
-  }
-}
-
-async function updateTotalCandidateRecord(cacheKey:string, newState:number, oldState:number | null, newStateName:string, oldStateName:string, candidate_id:string){
-  if (oldState === null) {
-    // Update candidate totalVote logic 
-    await incrementJsonCache(cacheKey, `$.${newStateName}`, 1);
-    await incrementJsonCache(cacheKey, `$.totalNotVote`, -1);
-    await updateResultDatabase(newState, oldState, candidate_id);
-  } else {
-    await incrementJsonCache(cacheKey, `$.${newStateName}`, 1);
-    await incrementJsonCache(cacheKey, `$.${oldStateName}`, -1);
-    await updateResultDatabase(newState, oldState, candidate_id);
   }
 }
 
@@ -100,15 +38,15 @@ async function updateResultDatabase(
 ): Promise<number> {
   let delta = 0;
 
-  if (oldState === IStateRecord.VOTE) {
+  if (oldState === IStateRecord.VOTE && newState !== IStateRecord.VOTE) {
     delta -= 1;
   }
 
-  if (newState === IStateRecord.VOTE) {
+  else if (newState === IStateRecord.VOTE) {
     delta += 1;
   }
-
-  return await updateFinalRecord(candidate_id.toString(), delta);
+  const totalRecord = await updateFinalRecord(candidate_id.toString(), delta);
+  return totalRecord
 }
 
 // Update state member in cache redis 

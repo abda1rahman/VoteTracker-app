@@ -13,10 +13,6 @@ interface ICandidate {
   socketId: string;
 }
 
-interface IRecords {
-  totalVote: number;
-}
-
 export let socketCandidtes:ICandidate[] = [];
 let allCandidate: any = new Set();
 
@@ -25,6 +21,7 @@ const io = new Server(server, {
     origin: [`http://127.0.0.1:5501`, `http://localhost:1337`],
     methods: ["GET", "POST"],
   },
+
 });
 
 io.on("connection", (socket) => {
@@ -66,14 +63,14 @@ io.on("connection", (socket) => {
 
 export function emitWebSocketEvent(
   candidate_id: string,
-  finalResult: IRecords
+  finalResult: number
 ) {
   const socketData = socketCandidtes.find(
     (cand: any) => cand.candidate_id === candidate_id
   );
   if (socketData) {
     log.info("socketData", socketData);
-    io.to(socketData.socketId as string).emit("get_result",  finalResult.totalVote );
+    io.to(socketData.socketId as string).emit("get_result", finalResult );
   }
 }
 

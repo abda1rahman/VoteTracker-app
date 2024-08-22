@@ -231,9 +231,9 @@ export const createVoteRecordHandler = async (
     // Update cache records
     const finalResult = await updateCacheRecord(envoy, state, oldState, member);
 
-    // Event web socket
-    if (finalResult) {
-      emitWebSocketEvent(envoy.candidate_id.toString(), finalResult);
+    // Send event socket io 
+    if (finalResult !== undefined && VoteRecord?.state !== 3 && VoteRecord?.state !== 2) {
+      emitWebSocketEvent(envoy.candidate_id.toString(), finalResult ?? 0);
     }
 
     return res.status(200).json(successResponse(200, message, VoteRecord));
