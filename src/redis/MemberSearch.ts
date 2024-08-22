@@ -30,22 +30,12 @@ export async function setCacheHashMember(
 
 export async function checkExistCacheMember(box_id: string): Promise<boolean> {
   try {
-    const getKeysNum = await client.sendCommand([
-      "SCAN",
-      "0",
-      "MATCH",
-      `boxMembers:${box_id}:member:*`,
-      "COUNT",
-      "100",
-    ]);
-    const [keys, listKeys]: any = getKeysNum;
-    return listKeys.length > 0;
-  } catch (error) {
-    log.error(
-      "Error in store data redis/MemberSearch => checkExistCacheMember"
-    );
+    const pattren = `boxMembers:${box_id}:member:*`
+    const result = await client.KEYS(pattren)
 
-    // Return false if an error occurs
+    return result.length > 0
+  } catch (error) {
+    log.error("Error in store data redis/MemberSearch => checkExistCacheMember")
     return false;
   }
 }
