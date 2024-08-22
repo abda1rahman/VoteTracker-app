@@ -34,9 +34,9 @@ form.addEventListener("submit", (e) => {
 
 // Handle WebSocket events
 socket.on("get_result", (data) => {
-  console.log("get_result:", data.totalVote); // Log data for debugging
+  console.log("get_result:", data); // Log data for debugging
 
-  if (data && data.totalVote !== undefined) {
-    vote_result.textContent = data.totalVote; // Update the HTML element with the new data
+  if (data && data !== undefined) {
+    vote_result.textContent = data; // Update the HTML element with the new data
   }
 });

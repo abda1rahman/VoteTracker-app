@@ -17,7 +17,7 @@ interface IRecords {
   totalVote: number;
 }
 
-export let socketCandidtes: any = [];
+export let socketCandidtes:ICandidate[] = [];
 let allCandidate: any = new Set();
 
 const io = new Server(server, {
@@ -28,19 +28,24 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
+  log.info('=======================================================')
   console.log(`Connection successful ✅ socketId: ${socket.id}`);
 
   // Handle new socketCandidtes
   socket.on("new_candidate", async (id) => {
-    if (!allCandidate.has(id) && socket.id && id.length > 10) {
+    if (!allCandidate.has(socket.id) && socket.id && id.length > 10) {
       socketCandidtes.push({ candidate_id: id, socketId: socket.id });
-      allCandidate.add(id);
-      log.info('Socket Data :', socketCandidtes)
+      allCandidate.add(socket.id);
+      console.log('Socket Data :', socketCandidtes)
+
       // Get final result for candidate
       const finalResult = await getFinalResultCandidate(id);
+      console.log(`finalResult: ${finalResult} for this ${id} `)
       socket.emit("get_result", finalResult );
     } else {
-      log.warn(`Rejected ${socket.id}`);
+      log.info('=======================================================')
+      console.log('Socket Data :', socketCandidtes)
+      log.warn(`already exist socket.id ${socket.id}`);
       socket.emit("error", {
         message: "Invalid candidate ID or already connected.",
       });
@@ -48,13 +53,9 @@ io.on("connection", (socket) => {
     }
   });
 
-
-  // testing socket 
-  socket.on('msg', msg => {
-    console.log(`the message: ${msg}`)
-  })
   // run when user disconnect
   socket.on("disconnect", () => {
+    console.log('==================================================')
     log.info(`dissconnected ❌ socket Id: ${socket.id}`);
     socketCandidtes = socketCandidtes.filter(
       (cand: ICandidate) => cand.socketId !== socket.id
