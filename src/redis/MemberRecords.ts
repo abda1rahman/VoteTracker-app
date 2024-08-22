@@ -2,7 +2,7 @@ import { SchemaFieldTypes } from "redis";
 import client from "./index";
 import log from "../utils/logger/index";
 
-export async function setCache(
+export async function setJsonCache(
   key: string,
   value: any,
   ttl: number = 3600 * 4
@@ -17,7 +17,7 @@ export async function setCache(
   }
 }
 
-export async function getCache(key: string): Promise<any | null> {
+export async function getJsonCache(key: string): Promise<any | null> {
   try {
     const data = await client.json.get(key);
     return data || null;
@@ -27,7 +27,7 @@ export async function getCache(key: string): Promise<any | null> {
   }
 }
 
-export async function incrementByCache(
+export async function incrementJsonCache(
   key: string,
   path: string,
   number: number = 3600
@@ -35,7 +35,23 @@ export async function incrementByCache(
   try {
     await client.json.numIncrBy(key, path, number);
   } catch (error: any) {
-    log.error("error in redis.service => incrementByCache", error.message);
+    log.error("error in redis/MemberRecords => incrementJsonCache", error.message);
     return;
+  }
+}
+
+export async function setHashCache(
+  Hashkey: string,
+  fieldName:string,
+  value:number,
+){
+  try {
+    const Result = await client.HSET(Hashkey, fieldName, value)
+    if(Result === 1){
+      log.warn(Result)
+    }
+    return Result;
+  } catch (error:any) {
+    log.error("error in redis/MemberRecords => setHashCache", error.message);
   }
 }

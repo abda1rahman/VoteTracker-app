@@ -219,8 +219,8 @@ export const createVoteRecordHandler = async (
     // Check old record state
     const oldState = await findRecordMember(member_id);
 
-    // Check if vote record already exists update if not created
-    const VoteRecord = await updateVoteRecord(envoy_id, member_id, state);
+    // Check if vote record already exists update if not created in database
+    const VoteRecord = await updateVoteRecord(envoy_id, member_id, state); 
 
     const isCreated =
       VoteRecord?.createdAt.getTime() === VoteRecord?.updatedAt.getTime();
@@ -229,7 +229,7 @@ export const createVoteRecordHandler = async (
       : "Vote updated successfully";
 
     // Update cache records
-    const finalResult = await updateCacheRecord(envoy, state, oldState);
+    const finalResult = await updateCacheRecord(envoy, state, oldState, member);
 
     // Event web socket
     if (finalResult) {
@@ -265,7 +265,7 @@ export const getMemberSearchHandler = async (
     let resultSearch: any;
 
     if (isExistMembers) {
-      logger.warn("already exist cache member");
+      logger.info("already exist cache member");
       resultSearch = await searchHashMember(box_id, query);
     } else {
       logger.warn("not exist cache members");

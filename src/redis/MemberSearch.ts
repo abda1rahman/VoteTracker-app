@@ -11,9 +11,9 @@ export async function setCacheHashMember(
     // List of required keys for validation
 
     for (let i = 0; i < value.length; i++) {
-      const member = value[i];
+      const member: IMemberSearch = value[i];
       if (hasRequiredKeys(member)) {
-        const keyName = key + i;
+        const keyName = key + member.identity;
         await client.hSet(keyName, member);
 
         if (ttl !== undefined) {
@@ -75,7 +75,7 @@ export async function searchHashMember(
       `${offset}`,
       `${limit}`,
       "SORTBY",
-      "firstName",
+      "identity",
       "ASC",
     ]);
 
@@ -98,14 +98,11 @@ export async function createIndexMember(box_id: string) {
       "1",
       `boxMembers:${box_id}`,
       "SCHEMA",
-      "firstName",
-      "TEXT",
-      "SORTABLE",
       "identity",
       "NUMERIC",
       "SORTABLE",
     ]);
-    log.info(`Create index ${box_id} => firstName `);
+    log.info(`Create index for box_id:${box_id} successfully`);
   } catch (error: any) {
     log.error("Error in redis/MemberSearch => createIndexMember");
   }
