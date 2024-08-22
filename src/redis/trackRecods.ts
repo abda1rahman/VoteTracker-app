@@ -41,7 +41,7 @@ export async function updateCacheRecord(
         await updateTotalCandidateRecord(cacheKey, newState, oldState, newStateName, oldStateName, envoy.candidate_id)
     } else {
       // Update member in cache state
-      await updateCacheMemberState(newState, member, envoy.candidate_id)
+      await updateCacheMemberState(newState, member, envoy.box_id)
 
       // Fetch total record result from database if cache doesn't exist
       const candidateTotal = await updateResultDatabase(
@@ -115,7 +115,7 @@ async function updateResultDatabase(
 async function updateCacheMemberState(newState: number, member: IMemberType, box_id: string){
   try {
     const key = `boxMembers:${box_id}:member:${member.identity}`
-    const value = newState === IStateRecord.VOTE ? 1 : 0
+    const value = newState === IStateRecord.NOT_VOTE ? 0 : 1
     const field = 'state'
     const result = await setHashCache(key, field, value)
     // if cache member not exit create all members box again
