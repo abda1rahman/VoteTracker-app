@@ -98,6 +98,10 @@ export const getSearchMemberSchema = object({
       (id) => isValidObjectId(id),
       { message: "box_id must be valid id" }
     ),
+    envoy_id: string({ required_error: "envoy_id should be string" }).refine(
+      (id) => isValidObjectId(id),
+      { message: "envoy_id must be valid id" }
+    ),
   })
 })
 

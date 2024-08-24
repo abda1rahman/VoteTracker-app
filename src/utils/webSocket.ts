@@ -26,7 +26,7 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   log.info('=======================================================')
-  console.log(`Connection successful ✅ socketId: ${socket.id}`);
+  console.log(`⚡⚡ Connection successful ⚡⚡ socketId: ${socket.id}`);
 
   // Handle new socketCandidtes
   socket.on("new_candidate", async (id) => {
@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
 
       // Get final result for candidate
       const finalResult = await getFinalResultCandidate(id);
-      console.log(`finalResult: ${finalResult} for this ${id} `)
+      console.log(` for CandidateId: ${id} `)
       socket.emit("get_result", finalResult );
     } else {
       log.info('=======================================================')
@@ -69,7 +69,8 @@ export function emitWebSocketEvent(
     (cand: any) => cand.candidate_id === candidate_id
   );
   if (socketData) {
-    log.info("socketData", socketData);
+    log.debug(`Data Emit to ${JSON.stringify(socketData)}`)
+    log.debug(`⚡⚡ Send TotalResult: ${finalResult}`);
     io.to(socketData.socketId as string).emit("get_result", finalResult );
   }
 }

@@ -190,6 +190,7 @@ export const createVoteRecordHandler = async (
   req: Request<{}, {}, VoteRecordInput>,
   res: Response
 ) => {
+  logger.debug(`📩  📩  📩  📩  📩  📩  📩  📩`)
   try {
     const { state, envoy_id, member_id } = req.body;
 
@@ -215,9 +216,9 @@ export const createVoteRecordHandler = async (
           errorResponse(404, "Member and envoy do not share the same box_id")
         );
     }
-
+    logger.debug(`🙋Member:${member.firstName} Vote:${state} id:${member.id} identity:${member.identity}`)
     // Check old record state
-    const oldState = await findRecordMember(member_id);
+    const oldState = await findRecordMember(envoy_id, member_id);
 
     // Check if vote record already exists update if not created in database
     const VoteRecord = await updateVoteRecord(envoy_id, member_id, state); 
@@ -249,40 +250,41 @@ export const getMemberSearchHandler = async (
   res: Response
 ) => {
   try {
-    const { box_id, query } = req.query;
+    logger.debug(`🔍🔍🔍🔍🔍🔍🔍🔍🔍🔍🔍🔍`)
+    const { box_id, query, envoy_id } = req.query;
 
     // Validate query parameters
-    if (!query || !box_id) {
+    if (!query || !box_id || !envoy_id) {
       return res
         .status(400)
         .json(
-          errorResponse(400, "Both 'query' and 'box_id' must be provided", [])
+          errorResponse(400, "'query' 'box_id' 'envoy_id' must be provided", [])
         );
     }
 
     // Check if members exist
-    const isExistMembers = await checkExistCacheMember(box_id);
+    const isExistMembers = await checkExistCacheMember(box_id, envoy_id);
     let resultSearch: any;
 
     if (isExistMembers) {
       logger.info("already exist cache member");
-      resultSearch = await searchHashMember(box_id, query);
+      resultSearch = await searchHashMember(box_id, envoy_id, query);
     } else {
-      logger.warn("not exist cache members");
 
       // Retrieve and cache members if not in cache
-      const memberList: IMemberSearch[] = await searchQueryMember(box_id);
+      const memberList: IMemberSearch[] = await searchQueryMember(box_id, envoy_id);
       // set data in cache
       await setCacheHashMember(
-        `boxMembers:${box_id}:member:`,
+        `boxMembers:${box_id}:${envoy_id}:member:`,
         memberList,
         3600 * 24 * 2
       ); // set data for 2 days
 
       // Create index after set cache
-      await createIndexMember(box_id);
+      await createIndexMember(box_id, envoy_id);
       await delay(500);
-      resultSearch = await searchHashMember(box_id, query);
+
+      resultSearch = await searchHashMember(box_id, envoy_id, query);
     }
 
     if (resultSearch.length < 1) {
@@ -322,6 +324,6 @@ export const exportMembersHandler = async (req: Request, res: Response) => {
 };
 
 // Utility function to create a delay
-function delay(ms: number) {
+export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -15,7 +15,6 @@ export async function setCacheHashMember(
       if (hasRequiredKeys(member)) {
         const keyName = key + member.identity;
         await client.hSet(keyName, member);
-
         if (ttl !== undefined) {
           await client.expire(keyName, ttl); // data expire after 1 day
         }
@@ -23,14 +22,15 @@ export async function setCacheHashMember(
         log.error(`invaild member ${i} data`);
       }
     }
+    log.debug(`Cache => set ${value.length} members in cache redis`)
   } catch (error: any) {
     log.error("Error in store data redis/MemberSearch => memberRedis");
   }
 }
 
-export async function checkExistCacheMember(box_id: string): Promise<boolean> {
+export async function checkExistCacheMember(box_id: string, envoy_id:string): Promise<boolean> {
   try {
-    const pattren = `boxMembers:${box_id}:member:*`
+    const pattren = `boxMembers:${box_id}:${envoy_id}:member:*`
     const result = await client.KEYS(pattren)
 
     return result.length > 0
@@ -42,6 +42,7 @@ export async function checkExistCacheMember(box_id: string): Promise<boolean> {
 
 export async function searchHashMember(
   box_id: string,
+  envoy_id:string,
   query: string,
   limit = 10,
   offset = 0
@@ -59,7 +60,7 @@ export async function searchHashMember(
 
     const searchResult = await client.sendCommand([
       "FT.SEARCH",
-      `boxMembers:${box_id}`,
+      `boxMembers:${box_id}:${envoy_id}`,
       `${searchQuery}`,
       `LIMIT`,
       `${offset}`,
@@ -77,16 +78,16 @@ export async function searchHashMember(
   }
 }
 
-export async function createIndexMember(box_id: string) {
+export async function createIndexMember(box_id: string, envoy_id:string) {
   try {
     await client.sendCommand([
       "FT.CREATE",
-      `boxMembers:${box_id}`,
+      `boxMembers:${box_id}:${envoy_id}`,
       "ON",
       "HASH",
       "PREFIX",
       "1",
-      `boxMembers:${box_id}`,
+      `boxMembers:${box_id}:${envoy_id}`,
       "SCHEMA",
       "identity",
       "NUMERIC",

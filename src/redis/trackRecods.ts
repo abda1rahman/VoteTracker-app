@@ -1,10 +1,10 @@
-import { Types } from "mongoose";
 import { setHashCache } from "./MemberRecords";
 import { IMemberType, IStateRecord } from "../model/box.model";
 import { searchQueryMember, updateFinalRecord } from "../service/box.service";
 import log from "../utils/logger";
 import { IMemberSearch } from "../service/types";
-import { setCacheHashMember } from "./MemberSearch";
+import { createIndexMember, setCacheHashMember } from "./MemberSearch";
+import { delay } from "../controller/box.controller";
 
 export async function updateCacheRecord(
   envoy: any,
@@ -22,7 +22,7 @@ export async function updateCacheRecord(
        const totalVote = await updateResultDatabase(newState, oldState, envoy.candidate_id);
 
     // Update Member state in cache 
-       await updateCacheMemberState(newState, member, envoy.box_id)
+       await updateCacheMemberState(newState, member, envoy.box_id, envoy._id)
 
     return totalVote;
   } catch (error: any) {
@@ -42,7 +42,7 @@ async function updateResultDatabase(
     delta -= 1;
   }
 
-  else if (newState === IStateRecord.VOTE) {
+  if (newState === IStateRecord.VOTE) {
     delta += 1;
   }
   const totalRecord = await updateFinalRecord(candidate_id.toString(), delta);
@@ -50,21 +50,27 @@ async function updateResultDatabase(
 }
 
 // Update state member in cache redis 
-async function updateCacheMemberState(newState: number, member: IMemberType, box_id: string){
+async function updateCacheMemberState(newState: number, member: IMemberType, box_id: string, envoy_id:string){
   try {
-    const key = `boxMembers:${box_id}:member:${member.identity}`
+    const key = `boxMembers:${box_id}:${envoy_id}:member:${member.identity}`
     const value = newState === IStateRecord.NOT_VOTE ? 0 : 1
     const field = 'state'
     const result = await setHashCache(key, field, value)
     // if cache member not exit create all members box again
     if(result === 1){
-      const memberList: IMemberSearch[] = await searchQueryMember(box_id);
+      const memberList: IMemberSearch[] = await searchQueryMember(box_id, envoy_id);
       // set data in cache
       await setCacheHashMember(
-        `boxMembers:${box_id}:member:`,
+        `boxMembers:${box_id}:${envoy_id}:member:`,
         memberList,
         3600 * 24 * 2
       ); // set data for 2 days
+
+      
+      // Create index after set cache
+      await createIndexMember(box_id, envoy_id);
+
+      await delay(500)
     }
   } catch (error:any) {
     log.error("Error in redis/trackRecords => updateCacheMemberState:", error.message);

@@ -9,8 +9,9 @@ export async function setHashCache(
 ){
   try {
     const Result = await client.HSET(Hashkey, fieldName, value)
+    log.debug(`Cache => set key ${Hashkey} => Cachevalue: ${value}`)
     if(Result === 1){
-      log.warn(`The member not exist in cache Hashkey:${Hashkey}`)
+      log.warn(`The member not exist set cache Hashkey:${Hashkey}`)
     }
     return Result;
   } catch (error:any) {

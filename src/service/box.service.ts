@@ -10,7 +10,7 @@ import {
 import { EnvoyModel } from "../model/users.model";
 import { BoxesInput } from "../schema/box.schema";
 import logger from "../utils/logger/index";
-import { IcandidateResult, IMemberSearch, IMembersInfo } from "./types";
+import { IMemberSearch, IMembersInfo } from "./types";
 
 type Ibox =
   | ({
@@ -41,10 +41,11 @@ async function findBoxById(box_id: string) {
 }
 
 async function findRecordMember(
+  envoy_id: string,
   member_id: string
 ): Promise<IStateRecord | null> {
   try {
-    const Record = await VoteRecordModel.findOne({ member_id });
+    const Record = await VoteRecordModel.findOne({ member_id, envoy_id });
 
     if (!Record) return null;
 
@@ -249,19 +250,32 @@ async function updateVoteRecord(
   }
 }
 
-async function searchQueryMember(box_id: string) {
+async function searchQueryMember(box_id: string, envoy_id: string) {
   try {
     const pipeline = [
       {
-        $match: { box_id: new Types.ObjectId(box_id) },
+        $match: {
+          box_id: new Types.ObjectId(box_id)
+        }
       },
       {
         $lookup: {
           from: "vote_records",
           localField: "_id",
           foreignField: "member_id",
-          as: "records",
-        },
+          as: "records"
+        }
+      },
+      {
+        $set: {
+          records: {
+            $filter: {
+              input: '$records',
+              as: 'record',
+              cond: { $eq: ["$$record.envoy_id", new Types.ObjectId(envoy_id)] }
+            }
+          }
+        }
       },
       {
         $addFields: {
@@ -398,7 +412,7 @@ async function updateFinalRecord(candidate_id: string, value: number) {
     );
 
     const totalVote = result?.totalVote ?? 0;
-
+    logger.debug(`Database => Candidate:${candidate_id} inc: ${value} totalValue: ${totalVote}`)
     return totalVote;
   } catch (error: any) {
     logger.error(

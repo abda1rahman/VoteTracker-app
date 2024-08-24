@@ -14,13 +14,13 @@ const LogFormat = process.env.NODE_ENV === 'production' ? format.combine(timesta
 
 // Create a Winston logger
 const logger = createLogger({
-  level: "info",
+  level: "debug",
   format: LogFormat,
   transports: [
     new transports.Console({
       format: consoleLogFormat,
     }),
-    new transports.File({ filename: "app.log" }),
+    new transports.File({ filename: "logs/app.log" }),
   ],
 });
 
