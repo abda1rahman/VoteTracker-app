@@ -275,7 +275,7 @@ async function getEnvoyByCandidateId(candidate_id: Types.ObjectId) {
             city_id: "$boxes.city_id",
             log: "$boxes.log",
             lat: "$boxes.lat",
-            boxName: "boxes.boxName",
+            boxName: "$boxes.boxName",
           },
         },
       },
