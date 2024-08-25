@@ -6,6 +6,7 @@ import { IStateRecord } from "../model/box.model";
 import fs from "fs";
 import path from "path";
 import { uploadExcelToCloudinary } from "./upload";
+import { ceil } from "lodash";
 
 export async function exportExcel(
   membersInfo: IMembersInfo,
@@ -68,12 +69,23 @@ export async function exportExcel(
         pattern: "solid",
         fgColor: { argb: "ffdaeef3" }, // Blue background
       };
+      cell.border = {
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
+
     });
+    sheet.getRow(2).eachCell((ceil, numRows)=> {
+      ceil.border = {
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
+    })
 
     members.forEach((member, idx) => {
       let { firstName, secondName, thirdName, lastName, state, ssn } = member;
       const ARState = getState(state);
-      sheet.addRow({
+      const row = sheet.addRow({
         id: idx + 1,
         firstName,
         secondName,
@@ -82,10 +94,41 @@ export async function exportExcel(
         ARState,
         ssn,
       });
+
+      // style every state with special color
+      row.eachCell(function (ceil, rowNumber) {
+        ceil.border = {
+          left: { style: 'thin' },
+          right: { style: 'thin' },
+        }
+
+        if (rowNumber === numColumns) {
+          const colorCode = getColorCode(ceil.value as string);
+          ceil.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: colorCode }, // Blue background
+          };
+        }
+      });
     });
 
+
+    sheet.getRow(1).eachCell((ceil, colNumber)=> {
+      ceil.border = {
+        top: {style: 'thin'}
+      }
+    })
+    sheet.getRow(members.length + 2).eachCell((ceil, colNumber)=> {
+      ceil.border = {
+        bottom: {style: 'thin'},
+        left: {style: 'thin'},
+        right: {style: 'thin'}
+      }
+    })
+
     // Set all cells to left alignment
-    sheet.eachRow({ includeEmpty: true }, (row) => {
+    sheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       row.eachCell({ includeEmpty: true }, (cell) => {
         cell.alignment = { horizontal: "right", vertical: "middle" };
       });
@@ -131,6 +174,17 @@ function getState(state: IStateRecord) {
     default:
       return "غير معروف"; // Default case to handle unexpected values
   }
+}
+
+function getColorCode(state: string) {
+  const colorMap: any = {
+    لا: "ffffb09c",
+    نعم: "ffa4ffa4",
+    للغير: "ffeeeeee",
+    سري: "ffeeeeee",
+  };
+
+  return colorMap[state] || "ffeeeeee";
 }
 
 function convertBoxToArabic(boxName: string) {

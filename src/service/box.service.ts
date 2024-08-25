@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 import {
   MemberModel,
   BoxesModel,
@@ -312,25 +312,31 @@ async function searchQueryMember(box_id: string, envoy_id: string) {
 
 async function getMembersDataVote(envoy_id: string) {
   try {
-    const pipeline = [
-      { $match: { _id: new Types.ObjectId(envoy_id) } },
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          _id: new Types.ObjectId(envoy_id)
+        }
+      },
       {
         $lookup: {
           from: "boxes",
           localField: "box_id",
           foreignField: "_id",
-          as: "boxes",
-        },
+          as: "boxes"
+        }
       },
       {
         $lookup: {
           from: "members",
-          let: { boxId: { $arrayElemAt: ["$boxes._id", 0] } },
+          let: {
+            boxId: { $arrayElemAt: ["$boxes._id", 0] }
+          },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$box_id", "$$boxId"] },
-              },
+                $expr: { $eq: ["$box_id", "$$boxId"] }
+              }
             },
             {
               $lookup: {
@@ -339,12 +345,17 @@ async function getMembersDataVote(envoy_id: string) {
                 pipeline: [
                   {
                     $match: {
-                      $expr: { $eq: ["$member_id", "$$memberId"] },
-                    },
-                  },
+                      $expr: {
+                        $eq: [
+                          "$member_id",
+                          "$$memberId"
+                        ]
+                      }
+                    }
+                  }
                 ],
-                as: "records",
-              },
+                as: "records"
+              }
             },
             {
               $project: {
@@ -359,19 +370,56 @@ async function getMembersDataVote(envoy_id: string) {
                 ssn: 1,
                 state: {
                   $cond: {
-                    if: { $gt: [{ $size: "$records" }, 0] },
-                    then: { $arrayElemAt: ["$records.state", 0] },
-                    else: 0,
-                  },
-                },
-              },
+                    if: {
+                      $gt: [{ $size: "$records" }, 0]
+                    },
+                    then: {
+                      $arrayElemAt: [
+                        "$records.state",
+                        0
+                      ]
+                    },
+                    else: 0
+                  }
+                }
+              }
             },
+            {
+              $addFields: {
+                sortOrder: {
+                  $switch: {
+                    branches: [
+                      {
+                        case: { $eq: ["$state", 1] },
+                        then: 1
+                      },
+                      {
+                        case: { $eq: ["$state", 0] },
+                        then: 2
+                      },
+                      {
+                        case: { $eq: ["$state", 3] },
+                        then: 3
+                      }
+                    ],
+                    default: 4 // Default to a value higher than 3 for state 0
+                  }
+                }
+              }
+            },
+            {
+              $sort: { sortOrder: 1 }
+            },
+            {
+              $unset: [
+                'sortOrder',
+                'box_id',
+                'id'
+              ]
+            }
           ],
-          as: "members",
-        },
-      },
-      {
-        $unset: ["boxes.__v"],
+          as: "members"
+        }
       },
       {
         $project: {
@@ -381,7 +429,8 @@ async function getMembersDataVote(envoy_id: string) {
         },
       },
     ];
-    const members: IMembersInfo[] = await EnvoyModel.aggregate(pipeline);
+
+    const members: IMembersInfo[] = await EnvoyModel.aggregate(pipeline)
 
     return members[0];
   } catch (error: any) {

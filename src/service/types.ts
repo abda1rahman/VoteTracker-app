@@ -73,6 +73,7 @@ export type Imember = {
   id: string
   identity: string;
   state: 0 | 1 | 2 | 3 
+  sortOrder: number;
 }
 
 export type IMembersInfo = {
