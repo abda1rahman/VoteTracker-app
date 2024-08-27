@@ -25,6 +25,8 @@ jobs:
           echo "MONGO_URL_PROD= ${{secrets.MONGO_URL_PROD}}" >> .env
           echo "MONGO_URL_DEV= ${{secrets.MONGO_URL_DEV}}" >> .env
           echo "MONGO_URL_TEST= ${{secrets.MONGO_URL_TEST}}" >> .env
+          echo "MONGO_USERNAME= ${{secrets.MONGO_USERNAME}}" >> .env
+          echo "MONGO_PASSWORD= ${{secrets.MONGO_PASSWORD}}" >> .env
           echo "NODE_ENV= ${{secrets.NODE_ENV}}" >> .env
           echo "HOST= ${{secrets.HOST}}" >> .env
           echo "PORT= ${{secrets.PORT}}" >> .env

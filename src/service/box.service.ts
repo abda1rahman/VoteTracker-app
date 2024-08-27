@@ -159,7 +159,7 @@ async function getAllBoxes(city_id: string) {
 async function getBoxByNameAndCity_id(boxName: string, city_Id: number) {
   try {
     const pipeline = [
-      { $match: { city_id: 1, boxName: boxName } },
+      { $match: { city_id: city_Id, boxName: boxName } },
       {
         $lookup: {
           from: "cities",

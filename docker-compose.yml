@@ -1,4 +1,5 @@
-version: "3.8"
+version: "3.9"
+
 services:
   vote-project:
     container_name: vote-tracker-app
@@ -17,11 +18,27 @@ services:
       - REFRESH_TOKEN_TIME=${RERESH_TOKEN_TIME}
       - COOKIE_EXPIRE=${COOKIE_EXPIRE}
     volumes:
-      - vote-app:/app
+      - vote_app:/app
     networks:
       - app-network
     depends_on:
       - redis
+      - mongodb
+  
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - database-data:/data/db
+    networks:
+      - app-network
+
 
   redis:
     image: redis/redis-stack:latest
@@ -35,8 +52,9 @@ services:
       - app-network
 
 volumes:
-  vote-app:
+  vote_app:
   redis_volume:
+  database-data:
 
 networks:
   app-network:
