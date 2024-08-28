@@ -1,17 +1,14 @@
 import ExcelJS from "exceljs";
 import { IMembersInfo } from "../service/types";
-import { Response } from "express";
 import log from "./logger";
 import { IStateRecord } from "../model/box.model";
 import fs from "fs";
 import path from "path";
-import { uploadExcelToCloudinary } from "./upload";
-import { ceil } from "lodash";
 
 export async function exportExcel(
   membersInfo: IMembersInfo,
   envoyId: string,
-  res: Response
+  baseURL:string
 ) {
   try {
     let { members, boxName } = membersInfo;
@@ -135,23 +132,22 @@ export async function exportExcel(
     });
     headerCell.alignment = { horizontal: "center" };
 
+    const filePath = process.env.NODE_ENV === "production" ? "../../../client/" : "../../client"
     // Ensure the directory exists
-    const tempDir = path.join(__dirname, "excelFile");
+    const tempDir = path.join(`${__dirname}`,filePath, `excelFile`);
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
 
-    // Save the workbook to temporary file
-    const fileName = "members" + envoyId;
+    // Save the excel to to directory
+    const fileName =  `box_${envoyId}`
     const tempFilePath = path.join(tempDir, `${fileName}.xlsx`);
 
+    
     await workbook.xlsx.writeFile(tempFilePath);
+    
+    const url = baseURL+ `/files/excelFile/${fileName}.xlsx`
 
-    // Response with the URL to download file
-    const url = await uploadExcelToCloudinary(tempFilePath, fileName);
-
-    // Clean up: remove the file after uploading
-    fs.unlinkSync(tempFilePath);
 
     return { url, fileName };
   } catch (error: any) {

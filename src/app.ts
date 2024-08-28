@@ -6,7 +6,7 @@ import { connectDB } from "./utils/connect";
 import router from "./routes/index.router";
 import dotenv from "dotenv";
 import { app, server } from "./utils/webSocket"; // diable web socket
-import { join } from "path";
+import path, { join } from "path";
 import log, { morganLogger } from "./utils/logger";
 
 dotenv.config();
@@ -27,12 +27,11 @@ app.use(cookieParaser());
 
 app.use(router);
 
-// Serve static files from the 'client' directory
-app.use(express.static(join(__dirname, "../../client/public")));
+const filepath = process.env.NODE_ENV === "production" ? "../../client" : "../client"
+app.use('/files', express.static(path.join(__dirname, filepath)));
 
-app.get("/", (req, res) => {
-  res.sendFile(join(__dirname, "../../client/public/index.html"));
-});
+app.use(express.static(join(__dirname, `${filepath}/public`)));
+
 
 server.listen(port, host, () => {
   log.info(`Server is running at localhost:${host} port: ${port}`);
