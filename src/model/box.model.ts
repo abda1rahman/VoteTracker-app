@@ -37,8 +37,8 @@ export type IFinalVoteResult = {
 const BoxesSchema = new mongoose.Schema(
   {
     city_id: { type: Number, ref: "City", required: true },
-    log: { type: Number, required: true },
-    lat: { type: Number, required: true },
+    log: { type: String, required: true },
+    lat: { type: String, required: true },
     boxName: { type: String, required: true },
   },
   {

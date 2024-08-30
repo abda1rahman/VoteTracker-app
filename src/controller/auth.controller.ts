@@ -28,7 +28,7 @@ export const registerCandidateHandler = async (
   res: Response
 ) => {
   let { firstName, lastName, city_id, password, phone, ssn } = req.body;
-  password = `${ssn}@12`;
+  password = ssn;
 
   try {
     // Check user
@@ -87,7 +87,7 @@ export const registerEnvoyHandler = async (
     box_id,
     candidate_id,
   } = req.body;
-  password = `${ssn}@12`;
+  password = ssn;
 
   try {
     // check box_id available
@@ -151,7 +151,7 @@ export const registerDeveloperHandler = async (
   res: Response
 ) => {
   let { firstName, lastName, ssn, password, city_id, phone } = req.body;
-  password = `${ssn}@12`;
+  password = ssn;
   try {
     const checkUser = await findUserBySsn(ssn)
     if (checkUser) {

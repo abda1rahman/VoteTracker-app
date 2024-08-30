@@ -9,8 +9,8 @@ export const createBoxesSchema = object({
       .int()
       .min(1)
       .max(12),
-    log: number({ required_error: "longitude required as number" }),
-    lat: number({ required_error: "latitude required as number" }),
+    log: string({ required_error: "longitude required as string" }),
+    lat: string({ required_error: "latitude required as string" }),
     boxName: string({ required_error: "Box Name required" }),
   }),
 });

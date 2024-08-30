@@ -51,8 +51,8 @@ export type IEnvoyInfo = {
   box: {
     id: string;
     city_id: number;
-    log: number;
-    lat: number;
+    log: string;
+    lat: string;
     boxName: string;
     city: string;
 };
