@@ -10,8 +10,8 @@ import path, { join } from "path";
 import log, { morganLogger } from "./utils/logger";
 
 dotenv.config();
-const port = process.env.NODE_ENV === "production" ? 80 : 1337;
-const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+const port = process.env.NODE_ENV === "production" ? Number(process.env.PORT) || 1337 : 1337;
+const host = process.env.NODE_ENV === "production" ? process.env.HOST as string || '0.0.0.0'  : "0.0.0.0";
 
 app.use(express.json());
 
@@ -34,7 +34,7 @@ app.use(express.static(join(__dirname, `${filepath}/public`)));
 
 
 server.listen(port, host, () => {
-  log.info(`Server is running at localhost:${host} port: ${port}`);
+  log.info(`Server is running at host:${host} port: ${port}`);
 
   connectDB();
 });

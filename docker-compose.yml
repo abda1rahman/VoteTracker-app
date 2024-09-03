@@ -5,7 +5,7 @@ services:
     container_name: vote-tracker-app
     build: .
     ports:
-      - "80:80"
+      - "1337:80"
     environment:
       - NODE_ENV = ${NODE_ENV}
       - MONGO_URL_DEV=${MONGO_URL_DEV}
@@ -24,6 +24,20 @@ services:
     depends_on:
       - redis
       - mongodb
+
+  nginx-server: 
+    container_name: nginx-server
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - app-network
   
   mongodb:
     image: mongo:latest
@@ -55,6 +69,7 @@ volumes:
   vote_app:
   redis_volume:
   database-data:
+  nginx_secrets:
 
 networks:
   app-network:
