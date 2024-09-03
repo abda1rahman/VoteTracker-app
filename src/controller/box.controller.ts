@@ -307,7 +307,7 @@ export const exportMembersHandler = async (req: Request, res: Response) => {
     // get all members data with vote state for envoy
     const membersInfo = await getMembersDataVote(envoyId);
 
-    const baseURL = `${req.protocol}://${req.get('host')}`
+    const baseURL = `https://${req.get('host')}`
 
     const { url, fileName } = await exportExcel(membersInfo, envoyId, baseURL);
 

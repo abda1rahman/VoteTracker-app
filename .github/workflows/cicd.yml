@@ -48,5 +48,5 @@ jobs:
 
       - name: Run Docker Container
         run: |
-          docker-compose up --build -d
+          docker-compose up vote-project -d
 
