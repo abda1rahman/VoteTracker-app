@@ -4,6 +4,7 @@ import log from "./logger";
 import { IStateRecord } from "../model/box.model";
 import fs from "fs";
 import path from "path";
+import {v4 as uuid} from 'uuid'
 
 export async function exportExcel(
   membersInfo: IMembersInfo,
@@ -140,7 +141,7 @@ export async function exportExcel(
     }
 
     // Save the excel to to directory
-    const fileName =  `box_${envoyId}`
+    const fileName =  `box_${uuid().slice(1,12)}`
     const tempFilePath = path.join(tempDir, `${fileName}.xlsx`);
 
     

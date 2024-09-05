@@ -341,14 +341,14 @@ async function getMembersDataVote(envoy_id: string) {
             {
               $lookup: {
                 from: "vote_records",
-                let: { memberId: "$_id" },
+                let: { memberId: "$_id", envoyId: new Types.ObjectId(envoy_id) },
                 pipeline: [
                   {
                     $match: {
                       $expr: {
-                        $eq: [
-                          "$member_id",
-                          "$$memberId"
+                        $and: [
+                          { $eq: ["$member_id", "$$memberId"] },
+                          { $eq: ["$envoy_id", "$$envoyId"] } // Filter by envoy_id here
                         ]
                       }
                     }
