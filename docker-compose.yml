@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  vote-project:
-    container_name: vote-tracker-app
+  nodejs:
+    container_name: nodejs
     build: .
     ports:
       - "1337:80"
@@ -25,17 +25,25 @@ services:
       - redis
       - mongodb
 
-  nginx-server: 
-    container_name: nginx-server
-    image: 'jc21/nginx-proxy-manager:latest'
+  nginx: 
+    container_name: nginx
+    image: nginx:latest
     restart: unless-stopped
     ports:
-      - '80:80'
-      - '81:81'
-      - '443:443'
+      - 80:80
+      - 443:443
     volumes:
-      - ./data:/data
-      - ./letsencrypt:/etc/letsencrypt
+      - ./nginx/:/etc/nginx/conf.d/:ro
+      - ./certbot/www/:/var/www/certbot/:ro
+    networks:
+      - app-network
+  
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
     networks:
       - app-network
   
@@ -69,7 +77,6 @@ volumes:
   vote_app:
   redis_volume:
   database-data:
-  nginx_secrets:
 
 networks:
   app-network:

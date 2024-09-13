@@ -1,12 +1,18 @@
 import { Server } from "socket.io";
 import express from "express";
+import fs from 'fs'
 import http from "http";
 import { getFinalResultCandidate } from "../redis/trackRecods";
 import log from "./logger";
 
 const app = express();
 
-const server = http.createServer(app);
+// const options = {
+//   key: fs.readFileSync(__dirname + '/key.pem', 'utf-8'),
+//   cert: fs.readFileSync(__dirname + '/cert.pem', 'utf-8'),
+// };
+
+const server = http.createServer(app)
 
 interface ICandidate {
   candidate_id: string;
@@ -16,13 +22,7 @@ interface ICandidate {
 export let socketCandidtes:ICandidate[] = [];
 let allCandidate: any = new Set();
 
-const io = new Server(server, {
-  // cors: {
-  //   origin: [`http://127.0.0.1:5501`, `http://localhost:1337`],
-  //   methods: ["GET", "POST"],
-  // },
-
-});
+const io = new Server(server);
 
 io.on("connection", (socket) => {
   log.info('=======================================================')

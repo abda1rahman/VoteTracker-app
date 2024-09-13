@@ -17,7 +17,7 @@ jobs:
 
       - name: Remove Old Containers and Images
         run: |
-          docker-compose down vote-project -v
+          docker-compose down nodejs -v
           docker system prune -a --volumes -f 
 
       - name: Create .env File
@@ -48,5 +48,5 @@ jobs:
 
       - name: Run Docker Container
         run: |
-          docker-compose up vote-project -d
+          docker-compose up nodejs -d
 
