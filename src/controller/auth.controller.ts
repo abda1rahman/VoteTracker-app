@@ -32,7 +32,7 @@ export const registerCandidateHandler = async (
 
   try {
     // Check user
-    const checkUser = await findUserBySsn(ssn)
+    const checkUser = await findUserBySsn(ssn);
     if (checkUser) {
       return res
         .status(400)
@@ -48,11 +48,7 @@ export const registerCandidateHandler = async (
       city_id,
     });
 
-    const token = generateToken(
-      candidate.id,
-      "candidate",
-      res
-    );
+    const token = generateToken(candidate.id, "candidate", res);
     // Format Response
     const userJson = { ...candidate, token };
 
@@ -66,9 +62,10 @@ export const registerCandidateHandler = async (
         )
       );
   } catch (error: any) {
-    log.error('Error in controller registerCandidateHandler', error.message)
+    log.error("Error in controller registerCandidateHandler", error.message);
     return res
-      .status(500).json(errorResponse(res.statusCode, "Something went wrong"));
+      .status(500)
+      .json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -93,27 +90,42 @@ export const registerEnvoyHandler = async (
     // check box_id available
     const availableBox = await findBoxByCandidateAndId(box_id, candidate_id);
     if (availableBox) {
-      return res.status(400).json(errorResponse(400, "This box is not available for registration."));
+      return res
+        .status(400)
+        .json(
+          errorResponse(400, "This box is not available for registration.")
+        );
     }
 
     // check user exist
-    const checkUser = await findUserBySsn(ssn)
+    const checkUser = await findUserBySsn(ssn);
     if (checkUser) {
-      return res.status(400).json(errorResponse(res.statusCode, "User or SSN already exists"));
+      return res
+        .status(400)
+        .json(errorResponse(res.statusCode, "User or SSN already exists"));
     }
 
     // check if candidate exist
-    const checkCandidate: any = await findCandidateById(candidate_id)
+    const checkCandidate: any = await findCandidateById(candidate_id);
     if (!checkCandidate) {
-      return res.status(400).json(errorResponse(res.statusCode,
-            "candidate_id does not exist in the system"));
+      return res
+        .status(400)
+        .json(
+          errorResponse(
+            res.statusCode,
+            "candidate_id does not exist in the system"
+          )
+        );
     }
 
     // check if box id
-    const checkBox = await findBoxById(box_id)
+    const checkBox = await findBoxById(box_id);
     if (!checkBox) {
-      return res.status(400).json(errorResponse(res.statusCode, 
-            "box_id does not exist in the system"));
+      return res
+        .status(400)
+        .json(
+          errorResponse(res.statusCode, "box_id does not exist in the system")
+        );
     }
     // check if envoy and candidate and city_id in the same city
     if (
@@ -122,11 +134,26 @@ export const registerEnvoyHandler = async (
         city_id === checkBox.city_id
       )
     ) {
-      return res.status(400).json(errorResponse(res.statusCode,
-            "The city_id of the envoy does not match the city_id of the candidate and the box."));
+      return res
+        .status(400)
+        .json(
+          errorResponse(
+            res.statusCode,
+            "The city_id of the envoy does not match the city_id of the candidate and the box."
+          )
+        );
     }
     // Create envoy
-    const envoy = await createEnvoy({firstName, lastName, password, ssn, phone, city_id, box_id, candidate_id})
+    const envoy = await createEnvoy({
+      firstName,
+      lastName,
+      password,
+      ssn,
+      phone,
+      city_id,
+      box_id,
+      candidate_id,
+    });
 
     // Create token
     const token = generateToken(envoy.id, "envoy", res);
@@ -134,14 +161,19 @@ export const registerEnvoyHandler = async (
     // Format response
     const userJson = {
       ...envoy,
-      token
+      token,
     };
 
-    res.status(201).json(successResponse(res.statusCode, "envoy created successfully", userJson));
+    res
+      .status(201)
+      .json(
+        successResponse(res.statusCode, "envoy created successfully", userJson)
+      );
   } catch (error: any) {
-    log.error('Error in controller registerEnvoyHandler', error.message)
+    log.error("Error in controller registerEnvoyHandler", error.message);
     return res
-      .status(500).json(errorResponse(res.statusCode, "Something went wrong"));
+      .status(500)
+      .json(errorResponse(res.statusCode, "Something went wrong"));
   }
 };
 
@@ -153,14 +185,21 @@ export const registerDeveloperHandler = async (
   let { firstName, lastName, ssn, password, city_id, phone } = req.body;
   password = ssn;
   try {
-    const checkUser = await findUserBySsn(ssn)
+    const checkUser = await findUserBySsn(ssn);
     if (checkUser) {
       return res
         .status(400)
         .json(errorResponse(res.statusCode, "User or SSN already exists"));
     }
 
-    const developer = await createDeveloper({firstName, lastName, ssn, phone, password, city_id})
+    const developer = await createDeveloper({
+      firstName,
+      lastName,
+      ssn,
+      phone,
+      password,
+      city_id,
+    });
 
     // Create token
     const token = generateToken(developer.id, "developer", res);
@@ -168,13 +207,22 @@ export const registerDeveloperHandler = async (
     // Format Data
     const infoJson = {
       ...developer,
-      token
+      token,
     };
-    res.status(201).json(successResponse(res.statusCode,
-      "Developer created successfully",infoJson));
-  } catch (error:any) {
-    log.error('Error in controller registerDeveloperHandler', error.message)
-    res.status(500).json(errorResponse(res.statusCode, "Internal server error"));
+    res
+      .status(201)
+      .json(
+        successResponse(
+          res.statusCode,
+          "Developer created successfully",
+          infoJson
+        )
+      );
+  } catch (error: any) {
+    log.error("Error in controller registerDeveloperHandler", error.message);
+    res
+      .status(500)
+      .json(errorResponse(res.statusCode, "Internal server error"));
   }
 };
 

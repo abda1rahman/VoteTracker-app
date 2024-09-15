@@ -485,5 +485,5 @@ export {
   searchQueryMember,
   getMembersDataVote,
   findRecordMember,
-  updateFinalRecord,
+  updateFinalRecord, Ibox,
 };

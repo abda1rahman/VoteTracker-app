@@ -1,6 +1,6 @@
 import morgan from "morgan";
 import { createLogger, format, transports } from "winston";
-const { combine, timestamp, json, colorize } = format;
+const { timestamp, json, colorize } = format;
 
 // Custom format for console logging with colors
 const consoleLogFormat = format.combine(

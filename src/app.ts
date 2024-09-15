@@ -38,3 +38,4 @@ server.listen(port, host, () => {
 
   connectDB();
 });
+
